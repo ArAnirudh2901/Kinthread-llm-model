@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+# training outputs: only the two final checkpoints are kept
+runs/*
+!runs/clutrr-qa-v8/
+runs/clutrr-qa-v8/*
+!runs/clutrr-qa-v8/best.pt
+!runs/name-tagger-v4/
+runs/name-tagger-v4/*
+!runs/name-tagger-v4/tagger.pt
+# browser engine
+web/node_modules/
+.DS_Store

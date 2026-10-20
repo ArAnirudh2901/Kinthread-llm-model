@@ -1,0 +1,8 @@
+# Weights, checkpoints and data must stay byte-exact (SHA-256 checked by verify_model.py): no conversion, no diffs.
+*.pt binary
+*.bin binary
+*.gz binary
+*.wasm binary
+*.parquet binary
+data/** binary
+web/model/** binary
