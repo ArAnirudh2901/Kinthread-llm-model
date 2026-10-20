@@ -53,3 +53,4 @@ any changed data from LLM-From-Scratch, regenerate `data/SHA256SUMS` if data cha
 - 2026-10-20: created from a subtree split of LLM-From-Scratch/2_Training_Tiny_LLM plus checkpoints, data
   (SHA256SUMS) and the exported model; README written; fresh-clone verify and a real `ask_qa.py` run passed;
   history authored only by ArAnirudh2901.
+- 2026-10-20: no changes to code or weights since creation; the Kinthread website ships `web/model` from here.
