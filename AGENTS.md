@@ -54,3 +54,4 @@ any changed data from LLM-From-Scratch, regenerate `data/SHA256SUMS` if data cha
   (SHA256SUMS) and the exported model; README written; fresh-clone verify and a real `ask_qa.py` run passed;
   history authored only by ArAnirudh2901.
 - 2026-10-20: no changes to code or weights since creation; the Kinthread website ships `web/model` from here.
+- 2026-10-21 (branch v9-reader): v9 reader pipeline merged (kinlogic engine, generator, train_reader.py, eval/, tests/). Train with colab/train_reader_colab.ipynb (clones this branch); see AGENTS.md in LLM-From-Scratch for the layout.
