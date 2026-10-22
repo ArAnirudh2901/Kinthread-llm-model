@@ -1,0 +1,87 @@
+{
+ "exam": "58/66",
+ "exam_acc": 0.8787878787878788,
+ "exam_dev_acc": 0.8387096774193549,
+ "exam_test_acc": 0.9142857142857143,
+ "exam_misses": [
+  [
+   "sp5",
+   "dev",
+   null,
+   "c",
+   "@0 male ; @1 female ; @0 husband #1 ; #1 brother #2 ; #2 father #3 ; @1 grandfather #4 ; #4 only son #3 ; ask @0 @1"
+  ],
+  [
+   "sp12",
+   "dev",
+   "b",
+   "c",
+   "@0 male ; @1 female ; @1 friend #1 ; @0 mother #2 ; @1 mother #3 ; @1 mother #2 ; ask @0 @1"
+  ],
+  [
+   "pz4",
+   "test",
+   null,
+   "a",
+   "members 7 ; couples 2 ; @0 grandmother @3 ; @1 mother @3 ; @1 wife @2 ; @5 mother @2 ; @4 granddaughter @6 ; @0 brother @6 ; ask @0 @2"
+  ],
+  [
+   "ds1",
+   "test",
+   null,
+   "d",
+   "ask @1 @0 ; part 1 ; @2 father @0 ; @1 brother @2"
+  ],
+  [
+   "ds2",
+   "test",
+   null,
+   "a",
+   "ask @1 @0 ; @1 only son @0 ; part 1 ; @2 mother @1"
+  ],
+  [
+   "ds4",
+   "dev",
+   "d",
+   "c",
+   "members 5 ; couples 1 ; ask @1 @4 ; part 2 ; @0 spouse @1 ; part 3 ; @2 father @3 ; part 4 ; @3 sister @0"
+  ],
+  [
+   "cl1",
+   "dev",
+   null,
+   "b",
+   "@1 brother @0 ; @2 mother @3 ; @0 father @4 ; claim 1 ; @4 son @1 ; claim 2 ; @0 mother @3 ; claim 3 ; @3 daughter @2"
+  ],
+  [
+   "hi1",
+   "dev",
+   "c",
+   "a",
+   "@1 maternal grandfather @0 ; @1 mother @2 ; ask @2 @0"
+  ]
+ ],
+ "authored_dev_acc": 0.8888888888888888,
+ "authored_test_acc": 0.8222222222222222,
+ "authored_n": {
+  "dev": 27,
+  "test": 45
+ },
+ "fresh_acc": 0.6,
+ "fresh_by_kind": {
+  "coded": "5/6",
+  "deep": "2/7",
+  "puzzle": "2/4",
+  "speech": "3/6",
+  "statements": "10/14",
+  "story": "2/3"
+ },
+ "gender_acc": 0.75,
+ "gender_by_kind": {
+  "constraint": "4/5",
+  "mixed": "1/1",
+  "name": "7/8",
+  "pronoun": "2/6",
+  "unisex": "4/4"
+ }
+}
