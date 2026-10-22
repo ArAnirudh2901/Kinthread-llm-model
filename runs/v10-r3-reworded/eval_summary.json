@@ -1,0 +1,22 @@
+{
+ "run": "v10-r3-reworded",
+ "checkpoint_step": 18000,
+ "pick_score": 1.2519,
+ "colab_eval": {
+  "exam": "63/66",
+  "exam_dev_acc": 0.903,
+  "exam_test_acc": 1.0,
+  "authored_dev_acc": 0.889,
+  "authored_test_acc": 0.778,
+  "fresh_acc": 0.7,
+  "gender_acc": 0.833,
+  "deep_acc": 0.993,
+  "clutrr_acc": 0.1,
+  "riddle_acc": 0.164,
+  "generated_answer": 0.952,
+  "reworded_answer": 0.783
+ },
+ "real_acc_k8": 0.4237,
+ "unseen_acc": 0.9921,
+ "r2_real_acc_k8": 0.4098
+}
