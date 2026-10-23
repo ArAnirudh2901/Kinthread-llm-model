@@ -386,6 +386,8 @@ class _Run:
     singles: int | None = None   # parents among the members whose spouse is not a member ("no single parent": 0)
     has: list = field(default_factory=list)
     extra: list = field(default_factory=list)
+    gens: list = field(default_factory=list)   # "x gen N"
+    roles: dict = field(default_factory=dict)   # "fathers 2": members who are fathers of members
 
     def tick(self) -> bool:
         self.steps += 1
@@ -430,14 +432,19 @@ def _finish(w, run: _Run):
     def counted(w1):   # in a closed family, unnamed relatives become members first, then counts are checked
         if closed:
             for w2 in _closed_family(w1, run):
-                yield from _has(w2, run.has, run, create=False)
+                for w3 in _has(w2, run.has, run):   # "W has only one child": a missing one is a member too
+                    if len(w3.roots()) == len(w2.roots()):
+                        yield w3
+                    else:
+                        yield from _closed_family(w3, run)
         else:
             for w2 in _has(w1, run.has, run):
                 yield from _closed_family(w2, run)
 
     for w2 in _identities(w, run):
         for w4 in counted(w2):
-                for w5 in _gender_totals(w4, run):
+            for w4b in _role_totals(w4, run):
+                for w5 in _gender_totals(w4b, run):
                     for w6 in _gender_links(w5, run.links, run):
                         if _final_ok(w6, run):
                             yield w6
@@ -456,7 +463,34 @@ def _final_ok(w6, run: _Run) -> bool:
         # separate groups may sit on any levels relative to each other: only too many is wrong
         if span > run.generations or (parts == 1 and span != run.generations):
             return False
+    if run.gens and not _gens_ok(w6, run):
+        return False
     return run.singles is None or _singles(w6, run) == run.singles
+
+
+def _gens_ok(w, run: _Run) -> bool:
+    """"x gen N": checked once x's group of members spans every generation (or is the whole family); open otherwise."""
+    members = set(_members(w, run))
+    for f in run.gens:
+        x = w.find(run.ids[f['x']])
+        level, todo = {x: 0}, [x]
+        while todo:
+            a = todo.pop()
+            for b, d in [(w.father(a), -1), (w.mother(a), -1), (w.spouse(a), 0)] + [(c, 1) for c in w.children(a)]:
+                if b >= 0 and b not in level:
+                    level[b] = level[a] + d
+                    todo.append(b)
+        ms = [level[m] for m in members if m in level]
+        if not ms:
+            continue
+        span = max(ms) - min(ms) + 1
+        whole = len(ms) == len(members)
+        if (run.generations and span == run.generations) or (not run.generations and whole):
+            if level[x] - min(ms) + 1 != f['n']:
+                return False
+        elif run.generations and level[x] - min(ms) + 1 > f['n']:   # already deeper than N below the top member seen
+            return False
+    return True
 
 
 def _levels_ok(w) -> bool:
@@ -499,8 +533,8 @@ def _smallest(worlds, run: _Run, facts=(), priors=None, keep=(), cap: int = 400)
                     w2 = w.clone()
                     if not (w2.unify(u, v) and w2.normalize() and _final_ok(w2, run) and _violation(w2, run) is None):
                         continue
-                    if any(w.ent[n] in (priors or {}) and not w.g(n) and w2.g(n) not in (None, priors[w.ent[n]])
-                           for n in roots if w.named[n]):   # never against the gender a name suggests
+                    if any(not w.g(n) and w2.g(n) and w2.g(n) != (priors or {}).get(w.ent[n])
+                           for n in roots if w.named[n]):   # never a gender against the name's, nor one neither text nor name gives
                         continue
                     ids = run.ids   # every stated relation still named so; no couple of blood relatives
                     if any(f['t'] == 'rel' and w2.find(ids[f['y']]) not in w2.relatives(ids[f['x']], f['r'], f.get('side'))
@@ -682,6 +716,34 @@ def _has(w, has, run: _Run, create=True):
                 worlds = [w4 for w3 in worlds for w4 in _apply_path(w3, w3.find(x), path, -1)] if path else []
             for w3 in worlds:
                 yield from _has(w3, rest, run, create)
+
+
+def _role_totals(w, run: _Run):
+    """ "two fathers, three brothers and a mother in the group": members with a member child or sibling and an open
+    gender are given one, so that every stated count is exact."""
+    if not run.roles:
+        yield w
+        return
+    members = _members(w, run)
+    ms = set(members)
+    linked = [m for m in members if any(w.find(c) in ms for c in w.children(m) + w.siblings(m))]
+    open_ = [m for m in linked if not w.g(m)]
+    from itertools import product
+    for gs in product('MF', repeat=len(open_)):
+        if not run.tick():
+            return
+        w2 = w.clone()
+        if not (all(w2.set_g(m, g) for m, g in zip(open_, gs)) and w2.normalize()):
+            continue
+        ms2 = {w2.find(m) for m in members}
+        kids = lambda m: any(w2.find(c) in ms2 for c in w2.children(m))
+        sibs = lambda m: any(w2.find(c) in ms2 for c in w2.siblings(m))
+        count = {'fathers': sum(1 for m in ms2 if w2.g(m) == 'M' and kids(m)), 'mothers': sum(1 for m in ms2 if w2.g(m) == 'F' and kids(m)),
+                 'brothers': sum(1 for m in ms2 if w2.g(m) == 'M' and sibs(m)), 'sisters': sum(1 for m in ms2 if w2.g(m) == 'F' and sibs(m))}
+        if all(count[k] == n for k, n in run.roles.items()):
+            for m, g in zip(open_, gs):
+                w2.choices.append(('gender', m, g))
+            yield w2
 
 
 def _gender_totals(w, run: _Run):
@@ -995,6 +1057,10 @@ def solve(stmts: list[dict], label=lambda e: e, asks=(), parts=None, people=(), 
             run.links.append(s)
         elif t == 'has':
             run.has.append(s)
+        elif t == 'gen':
+            run.gens.append(s)
+        elif t == 'roles':
+            run.roles[s['role']] = s['n']
         elif t in ('members', 'couples', 'males', 'females', 'generations', 'singles'):
             setattr(run, t, s['n'])
     questions += [{'t': 'ask', 'x': x, 'y': y, 'picked': True} for x, y in asks]
@@ -1091,9 +1157,15 @@ def claim_holds(w: World, group: list[dict], ids: dict):
                     rel.append(r)
         if y in rel:
             return True if not f.get('only') or rel == [y] else False
-        neutral = [[st._replace(g=None) for st in q] for q in paths]
-        reach = any(y in w.follow(x, q) for q in neutral)
-        return None if reach and not w.g(y) else False
+        def maybe(q):   # like follow, but a still-open gender may become the step's one
+            cur = [w.find(x)]
+            for st in q:
+                outs = [w.father(c) for c in cur] + [w.mother(c) for c in cur] if st.m == 'U' else \
+                    [d for c in cur for d in w.children(c)] if st.m == 'D' else \
+                    [w.spouse(c) for c in cur] if st.m == 'S' else [d for c in cur for d in w.siblings(c)]
+                cur = list(dict.fromkeys(o for o in outs if o >= 0 and w.g(o) in (None, st.g) or o >= 0 and not st.g))
+            return cur
+        return None if any(y in maybe(q) for q in paths) else False
 
     def check(f, b):
         x, y = b.get(f.get('x')), b.get(f.get('y')) if f.get('y') else None

@@ -10,6 +10,8 @@ Facts
     x opposite y | x same y                       genders differ / match
     x has N [side] REL                            exactly N such relatives ("has only daughters": has 0 son)
     members N | couples N | generations N | males N | females N | singles N   closed-family puzzle facts (singles: single parents)
+    x gen N                                       x is in generation N of the family (1: the oldest)
+    fathers N | mothers N | brothers N | sisters N   members who are that to another member ("two fathers in the group")
 Questions
     ask x y               how is y related to x?
     who x [side] REL      who is x's REL?
@@ -32,8 +34,9 @@ COUNTABLE = ['male', 'female', 'people', 'couples']
 SIDES = ['paternal', 'maternal']
 PUZZLE = ['members', 'couples', 'generations', 'males', 'females', 'singles']
 GROUPS = ['part', 'claim']
+ROLES = ['fathers', 'mothers', 'brothers', 'sisters']
 QUESTIONS = ['ask', 'who', 'count', 'gender', 'pair']
-KEYWORDS = [';', *QUESTIONS, *PUZZLE, *GROUPS, 'not', 'only', 'has', 'male', 'female', 'opposite', 'same',
+KEYWORDS = [';', *QUESTIONS, *PUZZLE, *GROUPS, *ROLES, 'gen', 'not', 'only', 'has', 'male', 'female', 'opposite', 'same',
             'people', 'couple', *SIDES, *ATTRS]
 RELS = [*KIN, *sorted(NONKIN)]
 NUMBERS = [str(n) for n in range(0, 21)]
@@ -98,6 +101,8 @@ def parse_stmt(tk: list[str]) -> dict | None:
         return {'t': 'pair', 'what': b} if n == 2 and (b in ('male', 'female', 'couple') or b in KIN) else None
     if a in PUZZLE or a in GROUPS:
         return {'t': a, 'n': int(b)} if n == 2 and b.isdigit() else None
+    if a in ROLES:   # "fathers 2": two members are fathers of members; exact readers only for now
+        return {'t': 'roles', 'role': a, 'n': int(b)} if n == 2 and b.isdigit() else None
     if not is_ent(a) or b is None:
         return None
     if n == 2:
@@ -107,6 +112,8 @@ def parse_stmt(tk: list[str]) -> dict | None:
     if b == 'has':
         sr = _sided_rel(tk[3:], kin_only=True) if n >= 4 and tk[2].isdigit() else None
         return {'t': 'has', 'x': a, 'n': int(tk[2]), 'r': sr[1], 'side': sr[0]} if sr else None
+    if n == 3 and b == 'gen':   # "x gen 3": x belongs to the third generation (1: the oldest); exact readers only for now
+        return {'t': 'gen', 'x': a, 'n': int(tk[2])} if tk[2].isdigit() and int(tk[2]) >= 1 else None
     if n == 3 and b in ('opposite', 'same'):
         return {'t': b, 'x': a, 'y': tk[2]} if is_ent(tk[2]) and tk[2] != a else None
     y, r = tk[-1], tk[-2]
@@ -178,6 +185,10 @@ def format_stmt(s: dict) -> str:
         return f"gender {s['x']}"
     if t == 'pair':
         return f"pair {s['what']}"
+    if t == 'gen':
+        return f"{s['x']} gen {s['n']}"
+    if t == 'roles':
+        return f"{s['role']} {s['n']}"
     return f"{t} {s['n']}"
 
 
@@ -198,8 +209,8 @@ def format(stmts: list[dict]) -> str:
 # ---------- constrained decoding ----------
 
 MAX_NEW = 16
-_STARTERS = [*QUESTIONS, *PUZZLE, *GROUPS]
-_AFTER_ENT = ['not', 'only', *SIDES, *RELS, 'male', 'female', *ATTRS, 'opposite', 'same', 'has']
+_STARTERS = [*QUESTIONS, *PUZZLE, *GROUPS, *ROLES]
+_AFTER_ENT = ['not', 'only', *SIDES, *RELS, 'male', 'female', *ATTRS, 'opposite', 'same', 'has', 'gen']
 _SIDED = sorted(SIDED)
 _ONLY = sorted(ONLY)
 _PAIR = ['male', 'female', 'couple', *KIN]
@@ -253,13 +264,15 @@ def _allowed(written: list[str], ents: list[str]) -> list[str]:
         return people if n == 1 else [';']
     if a == 'pair':
         return _PAIR if n == 1 else [';']
-    if a in PUZZLE or a in GROUPS:
+    if a in PUZZLE or a in GROUPS or a in ROLES:
         return NUMBERS[1:] if n == 1 else [';']
     # a statement about a person
     if n == 1:
         return _AFTER_ENT
     if cur[1] == 'has':
         return NUMBERS if n == 2 else sided(3, kin_only=True)
+    if cur[1] == 'gen':
+        return NUMBERS[1:6] if n == 2 else [';']
     if last in ('male', 'female') or last in ATTRS:
         return [';']
     if last in ('opposite', 'same'):

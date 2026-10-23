@@ -155,6 +155,10 @@ def _roman_set(text):
 # ---------- the answer ----------
 
 NAMES_DECIDE = os.environ.get('KIN_NAMES_DECIDE', '1') == '1'   # a name's gender is taken as given (real exam keys: +8 of 576 dev questions vs preferring 'cannot be determined')
+NEAREST = os.environ.get('KIN_NEAREST', '1') == '1'   # still nothing: the closest option by generation, gender and kind
+INVERSE = os.environ.get('KIN_INVERSE', '1') == '1'   # no option names the answer but one names the reverse relation: take it
+RELAX = os.environ.get('KIN_RELAX', '1') == '1'   # a self-contradictory question still gets the answer its keys expect
+DESC_UNNAMED = os.environ.get('KIN_DESC_UNNAMED', '1') == '1'   # described people may turn out to be someone named
 SMALLEST = os.environ.get('KIN_SMALLEST', '0') == '1'   # smallest family for every spoken description (dev +1.1, locked test -0.4 with r3); off: exact speech readings only
 
 
@@ -164,6 +168,17 @@ def answer(text: str, read, priors: dict | None = None) -> dict:
         return _answer(text, read, priors)
     except Exception as e:   # one odd question must not stop a batch or the page
         return {'answer': 'error', 'option': None, 'status': 'error', 'explanation': f'{type(e).__name__}: {e}', 'facts': ''}
+
+
+def answer_adaptive(text: str, read, read_more, threshold: float = 0.6, priors: dict | None = None) -> dict:
+    """More readings only where the first ones disagree (test-time compute where it is needed, Snell et al. 2024):
+    answer with `read`; when the winning option holds less than `threshold` of the vote or nothing fits, answer again
+    with `read_more` (a wider beam plus samples)."""
+    first = answer(text, read, priors)
+    if first.get('status') not in ('error', 'none', 'contradiction') and first.get('confidence', 1.0) >= threshold:
+        return first
+    second = answer(text, read_more, priors)
+    return second if second.get('status') not in ('error',) else first
 
 
 def _answer(text: str, read, priors: dict | None = None) -> dict:
@@ -219,16 +234,138 @@ def _people(tokens, stmts):
     return out
 
 
+def _option_statements(options, ents):
+    """Claims for options that are statements about the question's people, or None."""
+    from .codes import option_claims
+    ids = {e['text']: e['id'] for e in ents if e.get('kind') in ('name', 'letter')}
+    return option_claims(options, ids)
+
+
+ROLE_PAIR = re.compile(r'^\s*([a-z][a-z -]*?)\s*(?:–|-|—|and|/|&)\s*([a-z][a-z -]*?)\s*$', re.I)
+PLURAL_ROLE = {'cousins': 'cousin', 'brothers': 'brother', 'sisters': 'sister', 'siblings': 'sibling', 'couple': 'spouse',
+               'husband and wife': 'spouse', 'brothers-in-law': 'brother-in-law', 'sisters-in-law': 'sister-in-law'}
+
+
+def _pair_option(r, stmts, options, ents):
+    """For "how is Y related to X?" / "relationship between X and Y": the one option that holds in every family, when
+    the options are statements ("P is the husband of T") or role pairs ("Uncle – Niece", "Cousins")."""
+    from .codes import _rel as code_rel
+    ask = next((st for st in reversed(stmts) if st['t'] == 'ask'), None)
+    if ask is None or not r['worlds']:
+        return None
+    x, y = ask['x'], ask['y']
+    ids = {e['text']: e['id'] for e in ents if e.get('kind') in ('name', 'letter')}
+    st_claims = _option_statements(options, ents)
+
+    def holds(facts):
+        return all(claim_holds(w, facts, r['ids']) is True for w in r['worlds'])
+
+    def rel_fact(a, word, b):   # b is a's WORD
+        rr = code_rel(word.strip().lower())
+        return None if rr is None else {'t': 'rel', 'x': a, 'r': rr[1], 'side': rr[0], 'y': b, 'neg': False, 'only': False, 'claim': 1}
+
+    ok = []
+    if st_claims:
+        groups, cur = [], None
+        for st in parse(' ; '.join(st_claims))[0]:
+            if cur is None or st.get('claim') != cur[0]:
+                cur = (st.get('claim'), [])
+                groups.append(cur)
+            cur[1].append(st)
+        labs = [l for l, o in options if not NONE.search(o) and not CANT.search(o)]
+        if len(groups) != len(labs):
+            return None
+        ok = [l for l, (_, fs) in zip(labs, groups) if all(f.get('x') in r['ids'] and (f.get('y', '@x')[0] == '#' or f.get('y') in r['ids']) for f in fs) and holds(fs)]
+    else:
+        for lab, o in options:
+            t = o.strip().lower().rstrip('.')
+            if t in PLURAL_ROLE:   # "Cousins": each is the other's
+                f1, f2 = rel_fact(x, PLURAL_ROLE[t], y), rel_fact(y, PLURAL_ROLE[t], x)
+            elif (m := ROLE_PAIR.match(t)) and code_rel(m.group(1).strip()) and code_rel(m.group(2).strip()):
+                f1, f2 = rel_fact(x, m.group(1), y), rel_fact(y, m.group(2), x)   # "Uncle – Niece": the first named (y) is the uncle
+            else:
+                continue
+            if f1 and f2 and x in r['ids'] and y in r['ids'] and holds([f1, f2]):
+                ok.append(lab)
+    return ok[0] if len(ok) == 1 else None
+
+
+def _shape(mv):
+    """(generations up, gender, by marriage, collateral) of a move path."""
+    ms = [m[0] for m in mv]
+    return ms.count('U') - ms.count('D'), mv[-1][1], 'S' in ms, any(m == 'U' and 'D' in ms[i + 1:] for i, m in enumerate(ms))
+
+
+def _nearest_option(a, options):
+    """The one option with the answer's generation and gender that best matches its kind (blood or marriage,
+    direct or collateral); None unless exactly one is best."""
+    if not a.get('moves'):
+        return None
+    gen, g, aff, coll = _shape(a['moves'])
+    g = a.get('gender') or g
+    scored = []
+    for lab, text in options:
+        mv = option_moves(text)
+        if not mv:
+            continue
+        ogen, og, oaff, ocoll = _shape(mv)
+        if ogen == gen and (not g or not og or g == og):
+            scored.append(((oaff == aff) + (ocoll == coll), lab))
+    top = max((sc for sc, _ in scored), default=None)
+    best = [lab for sc, lab in scored if sc == top]
+    return best[0] if len(best) == 1 else None
+
+
+def _inverse(stmts, people, priors, smallest):
+    """The last asked relation the other way round (y's relation to x), or None."""
+    i = max((k for k, st in enumerate(stmts) if st['t'] == 'ask'), default=None)
+    if i is None:
+        return None
+    alt = stmts[:i] + [{**stmts[i], 'x': stmts[i]['y'], 'y': stmts[i]['x']}] + stmts[i + 1:]
+    r = solve(alt, people=people, priors=priors, smallest=smallest)
+    return r['questions'][-1] if r['ok'] and r['questions'] and r['questions'][-1]['answers'] else None
+
+
+def _relaxed(stmts, people, priors, smallest):
+    """(result, facts) for the first single change that makes contradictory facts consistent: a gendered relation word
+    made neutral (wife -> spouse, mother -> parent) or a stated gender dropped; None if no single change does."""
+    from .engine import NEUTRAL
+    from .kin import KIN
+    for i, st in enumerate(stmts):
+        if st.get('claim') or st.get('part') or st.get('neg'):
+            continue
+        if st['t'] == 'rel' and NEUTRAL.get(st['r']) in KIN:
+            alt = stmts[:i] + [{**st, 'r': NEUTRAL[st['r']]}] + stmts[i + 1:]
+        elif st['t'] == 'gender':
+            alt = stmts[:i] + stmts[i + 1:]
+        else:
+            continue
+        r = solve(alt, people=people, priors=priors, smallest=smallest)
+        if r['ok'] and r['questions']:
+            return r, alt
+    return None
+
+
 def _answer_one(p, lf, read, priors):
     ents, options = p['ents'], p['options']
     priors = {**name_priors(ents), **(priors or {})}
     names = {e['id']: e['text'] for e in ents}
+    out = {'facts': lf, 'options': options}
+    lf_read = lf
+    if DESC_UNNAMED:   # "the boy", "a man": a description, not a name, so facts like "only grandson" may make it someone named
+        desc = {e['id'] for e in ents if e.get('kind') == 'desc'}
+        lf = re.sub(r'@(\d+)\b', lambda m: f'#{900 + int(m.group(1))}' if m.group(0) in desc else m.group(0), lf)
+        names.update({f'#{900 + int(d[1:])}': names[d] for d in desc})
     stmts, _ = parse(lf)
     people = _people(p['tokens'], stmts)
-    out = {'facts': lf, 'options': options}
     low = p['question'].lower()
+    if options and stmts and not any(st['t'] in ('ask', 'who', 'count', 'gender?', 'pair') or st.get('claim') or st.get('part') for st in stmts) \
+            and re.search(r'which (?:of the following|one|among the following)[^?]*\b(?:true|correct|false|incorrect)\b', low):
+        cl = _option_statements(options, ents)   # "which of the following statements is not definitely true?" after an exact reading
+        if cl:
+            stmts = stmts + parse(' ; '.join(cl))[0]
 
-    expr_opts = options and sum(bool(re.search(r'[A-Za-z]\s*[^\w\s,.()\'"]{1,2}\s*[A-Za-z]', o)) for _, o in options) * 2 > len(options)
+    expr_opts = options and sum(bool(re.search(r'\b[A-Za-z]\s*(?:[^\w\s,.()\'"]{1,2}|\d)\s*[A-Za-z]\b', o)) for _, o in options) * 2 > len(options)
     if any(s.get('claim') for s in stmts) and expr_opts:   # the options are expressions: read each one
         return {**out, **_which_expression(p, stmts, read, priors)}
     if any(s.get('claim') for s in stmts):
@@ -237,11 +374,17 @@ def _answer_one(p, lf, read, priors):
         return {**out, **_sufficiency(stmts, options, people, priors)}
     spoken = '"' in p['tokens'] and re.search(r'\b(?:said|says|say|told|tells|introduc\w*|pointing|points?)\b', ' '.join(p['tokens']))
     if spoken and not SMALLEST:   # the convention only on readings the exact speech reader wrote (model misreadings: off)
+        from .rules import read as read_rules
         from .speech import read as read_speech
-        spoken = read_speech(p['tokens']) == lf
+        spoken = lf_read in (read_speech(p['tokens']), read_rules(p['tokens']))
     r = solve(stmts, people=people, priors=priors, smallest=bool(spoken))
     if not r['questions']:
         return {**out, 'answer': 'no question found', 'option': None, 'status': 'none', 'explanation': ''}
+    if not r['ok'] and RELAX:   # self-contradictory question (a coded chain that makes P both a wife and a mother):
+        relaxed = _relaxed(stmts, people, priors, bool(spoken))   # answer with the one gender clash taken out
+        if relaxed:
+            r, stmts = relaxed
+            out['facts'] = out['facts'] + '  [relaxed: one gender clash ignored]'
     if not r['ok']:
         return {**out, 'answer': 'contradiction', 'option': None, 'status': 'contradiction',
                 'explanation': 'The facts as read contradict each other.'}
@@ -276,6 +419,19 @@ def _answer_one(p, lf, read, priors):
             a, lab = _relation_option(alternatives(r, qi), options, status)
             if lab:
                 res['explanation'] += f"\n[NOTE]: Read with {names.get(a['merged'][1], a['merged'][1])} as the person the text leaves unnamed."
+            elif (lab := _pair_option(r, stmts, options, ents)):   # "(a) P is the husband of T", "(b) Uncle – Niece"
+                res['explanation'] += '\n[NOTE]: The option that holds in every family that fits.'
+                return {**out, **res, 'answer': cands[0].get('label') or cands[0]['key'], 'option': lab}
+            elif INVERSE and not _labelled(options, NONE) and not _labelled(options, CANT):
+                q2 = _inverse(stmts, people, priors, bool(spoken))   # "How is Riya related to that man? (a) Father": keyed the other way round
+                a, lab = _relation_option(list(q2['answers']), options, q2['status']) if q2 else (None, None)
+                if lab:
+                    res['explanation'] += '\n[NOTE]: No option names this relation; the options name the reverse one.'
+                    return {**out, **res, 'answer': a.get('label') or a['key'], 'option': lab}
+                lab = _nearest_option(cands[0], options) if NEAREST else None
+                if lab:   # "father's cousin" with options Sister / Mother / Mother-in-law / Aunt: the setter's loose "Aunt"
+                    res['explanation'] += '\n[NOTE]: No option names this relation exactly; the closest one (same generation, gender and kind) is chosen.'
+                    return {**out, **res, 'answer': cands[0].get('label') or cands[0]['key'], 'option': lab}
         a = a or cands[0]
         label = a.get('label') or a['key']
         text_ans = q.get('neutral') or label if q['status'] == 'gender' and a is cands[0] else label
@@ -309,9 +465,9 @@ def _claims(stmts, options, low, people, priors):
     lab = None
     if 'how many' in low:
         lab = next((l for l, o in options if _number(o) == len(hits)), None)
-    elif options and len(options) == len(verdicts) and all(re.search(r'\b(is|are|was)\b', o) for _, o in options):
-        picked = [l for (l, _), k in zip(options, sorted(verdicts)) if k in hits]   # the options are the statements
-        lab = picked[0] if len(picked) == 1 else None
+    elif options and len(stmt_opts := [(l, o) for l, o in options if re.search(r'\b(is|are|was)\b', o) and not NONE.search(o)]) == len(verdicts):
+        picked = [l for (l, _), k in zip(stmt_opts, sorted(verdicts)) if k in hits]   # the options are the statements
+        lab = picked[0] if len(picked) == 1 else (_labelled(options, NONE) if not picked else None)   # "(d) None of the above"
     else:
         for l, o in options:
             s = _roman_set(o)
@@ -376,7 +532,7 @@ def _which_expression(p, stmts, read, priors):
              for _, o in p['options']]
     preps = [prepare(t) for t in texts]
     lfs = [g if isinstance(g, str) else (g[0][0] if isinstance(g[0], tuple) else g[0]) for g in read([pp['tokens'] for pp in preps])]
-    ok, options_ = [], p['options']
+    ok, maybe, options_ = [], [], p['options']
     for (lab, o), pp, lf in zip(p['options'], preps, lfs):
         by = {e['text']: e['id'] for e in pp['ents']}
         x, y = by.get(names.get(c['x'])), by.get(names.get(c['y']))
@@ -384,8 +540,13 @@ def _which_expression(p, stmts, read, priors):
         if x is None or y is None:
             continue
         r = solve(st, people=[e['id'] for e in pp['ents']])
-        if r['worlds'] and all(claim_holds(w, [{**c, 'x': x, 'y': y, 'claim': 1}], r['ids']) is True for w in r['worlds']):
+        vs = [claim_holds(w, [{**c, 'x': x, 'y': y, 'claim': 1}], r['ids']) for w in r['worlds']]
+        if vs and all(v is True for v in vs):
             ok.append(lab)
+        elif vs and all(v is not False for v in vs):
+            maybe.append(lab)   # holds once the gender the expression leaves open is the asked one
+    if not ok and len(maybe) == 1:
+        ok = maybe
     return {'answer': ', '.join(ok) or 'none', 'option': ok[0] if len(ok) == 1 else (_labelled(options_, NONE) if not ok else None),
             'status': 'expression',
             'explanation': f"[CHECKED]: options {', '.join(ok) or 'none'} make {names.get(c['y'])} the {c['r']} of {names.get(c['x'])}"}

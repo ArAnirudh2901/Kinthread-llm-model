@@ -17,15 +17,16 @@ VERB = r'(?:means|implies|denotes|represents|indicates|signifies|stands for|is c
 NOT_OP = {',', ';', '.', ':', '(', ')', '[', ']', 'and', 'or', 'if', 'then', 'is', 'the', 'of', 'a', 'an', 'to', 'in'}
 REL = r'((?:paternal |maternal )?[a-z][a-z-]*)'
 E = r'(@\d+)'
-DEF_FWD = re.compile(rf'{E} (\S+) {E} ,? ?{VERB} {E} is (?:the )?{REL} (?:of )?{E}')
-DEF_MARRIED = re.compile(rf'{E} (\S+) {E} ,? ?{VERB} {E} is married to {E}')
-DEF_POSS = re.compile(rf"{E} (\S+) {E} ,? ?{VERB} {E} is {E} 's {REL}")
+DEF_FWD = re.compile(rf'{E} (\S+) {E} ,? ?{VERB} (?:that )?{E} is (?:the )?{REL} (?:of )?{E}')
+DEF_MARRIED = re.compile(rf'{E} (\S+) {E} ,? ?{VERB} (?:that )?{E} is married to {E}')
+DEF_POSS = re.compile(rf"{E} (\S+) {E} ,? ?{VERB} (?:that )?{E} is {E} 's {REL}")
 ASK = [re.compile(p) for p in (   # each: how is the first person related to the second?
     rf'how is {E} (?:related|connected) (?:to|with) {E}', rf'how {E} is (?:related|connected) (?:to|with) {E}', rf'(?:what|who) is {E} to {E}', rf'{E} is related to {E} as',
     rf'relation(?:ship)? of {E} (?:to|with) {E}', rf'relation(?:ship)? between {E} and {E}',
     rf'in what way is {E} related to {E}', rf'find the relation of {E} (?:with|to) {E}', rf'what relation does {E} have with {E}',
     rf'which of the following is the relation of {E} to {E}', rf'how are {E} and {E} related', rf"{E} is {E} 's \?",
-    rf'{E} is (?:the )?____ (?:of|to) {E}', rf"{E} is {E} 's ____")]   # fill in the blank
+    rf'{E} is (?:the )?____ (?:of|to) {E}', rf"{E} is {E} 's ____",   # fill in the blank
+    rf"what is {E} 's relation(?:ship)? (?:to|with) {E}", rf'find (?:out )?the relation(?:ship)? between {E} and {E}')]
 GENDER = re.compile(rf'{E} (?:, )?(?:who )?is (?:an? )?(female|male|woman|man|girl|boy|lady|gentleman)\b')
 FEMALE = {'female', 'woman', 'girl', 'lady'}
 _WV = r'(?:(?:would|will|can|does) )?(?:means?|shows?|indicates?|represents?|implies|imply|denotes?)'
@@ -53,10 +54,12 @@ def _rel(word):
 def definitions(text):
     """{symbol: (side, relation, flipped)}: flipped when "A op B" means "B is A's relation"; None if two
     definitions of one symbol disagree."""
-    defs = {}
+    defs, typo = {}, {}
     for m in DEF_FWD.finditer(text):
         a, op, b, x, rel, y = m.groups()
         r = _rel(rel)
+        if r is not None and op not in NOT_OP and a != b and x in (a, b) and y not in (a, b):
+            typo[op] = (r[0], r[1], x == b)   # "P ÷ Q means P is the son of B": a misprint for Q, used only if nothing else defines ÷
         if r is None or op in NOT_OP or {x, y} != {a, b} or a == b:
             continue
         d = (r[0], r[1], x == b)
@@ -76,6 +79,8 @@ def definitions(text):
             continue
         if defs.setdefault(op, (None, 'spouse', False)) != (None, 'spouse', False):
             return None
+    for op, d in typo.items():
+        defs.setdefault(op, d)
     return defs
 
 
@@ -123,6 +128,42 @@ def facts_of(run, defs):
     return fs
 
 
+_W = r'([A-Za-z]\w*)'
+_R = r'((?:paternal |maternal )?[a-z][a-z-]*?)'
+PAIR = re.compile(rf'^\s*{_W} and {_W} are (brothers|sisters|siblings|cousins|brothers-in-law|sisters-in-law|(?:a )?(?:married )?couple|husband and wife)\s*\.?\s*$', re.I)
+SAME = re.compile(rf'^\s*(?:the )?gender of {_W} and {_W} is (?:the )?(same|different)\s*\.?\s*$', re.I)
+NESTED = re.compile(rf'^\s*{_W} is (?:the )?{_R} of (?:the )?{_R} of {_W}\s*\.?\s*$', re.I)
+BOTH = re.compile(rf'^\s*{_W} is (?:the )?{_R} (?:of|to) {_W} and {_W}\s*\.?\s*$', re.I)
+
+
+def _option_forms(o, ids):
+    """Facts for the wider statement forms; None when o is not one of them, [] when it is but cannot be read."""
+    one = lambda x, rel, y: (lambda r: None if r is None or x not in ids or y not in ids else f"{ids[y]} {(r[0] + ' ') if r[0] else ''}{r[1]} {ids[x]}")(_rel(rel.lower()))
+    if m := PAIR.match(o):
+        x, y, kind = m.group(1), m.group(2), m.group(3).lower()
+        if x not in ids or y not in ids:
+            return []
+        if 'couple' in kind or 'husband' in kind:
+            return [f'{ids[x]} spouse {ids[y]}']
+        word = {'brothers': 'brother', 'sisters': 'sister', 'siblings': 'sibling', 'cousins': 'cousin',
+                'brothers-in-law': 'brother-in-law', 'sisters-in-law': 'sister-in-law'}[kind]
+        return [f'{ids[x]} {word} {ids[y]}', f'{ids[y]} {word} {ids[x]}'] if word in KIN else []
+    if m := SAME.match(o):
+        x, y = m.group(1), m.group(2)
+        return [f"{ids[x]} {'same' if m.group(3).lower() == 'same' else 'opposite'} {ids[y]}"] if x in ids and y in ids else []
+    if m := NESTED.match(o):   # "R is the sister of the wife of U": U's wife's sister is R
+        x, r1, r2, y = m.groups()
+        a, b = _rel(r2.lower()), _rel(r1.lower())
+        if a is None or b is None or x not in ids or y not in ids:
+            return []
+        return [f"{ids[y]} {(a[0] + ' ') if a[0] else ''}{a[1]} #90", f"#90 {(b[0] + ' ') if b[0] else ''}{b[1]} {ids[x]}"]
+    if m := BOTH.match(o):   # "K is father of L and M"
+        x, rel, y1, y2 = m.groups()
+        fs = [one(x, rel, y1), one(x, rel, y2)]
+        return fs if all(fs) else []
+    return None
+
+
 def option_claims(options, ids):
     """Claims for statement options ("G is the maternal grandmother of R"), in option order; None unless every option
     except a closing 'none of these' is a statement about people of the question. ids: name/letter -> @k."""
@@ -130,6 +171,13 @@ def option_claims(options, ids):
     for _, o in options or []:
         o = _in_law(o.strip())
         if re.fullmatch(r'(?:none of (?:these|the above)|all of (?:these|the above)|cannot be determined)\.?', o, re.I):
+            continue
+        extra = _option_forms(o, ids)
+        if extra is not None:   # "F and Y are brothers", "gender of F and W is same", "R is the sister of the wife of U"
+            if not extra:
+                return None
+            n += 1
+            out += [f'claim {n}'] + extra
             continue
         m, mp = STATEMENT.match(o), STATEMENT_POSS.match(o)
         if mp:
@@ -188,11 +236,11 @@ def read(tokens, options=None, ents=None) -> str | None:
         runs = runs[-1:]
     runs = runs[0] if isinstance(runs[0][0], list) else runs
     people = set(p for r in runs for p in r[::2])
-    if claims and re.search(r'which (?:of the following|one|among the following)[^?]*\b(?:true|correct|false|incorrect|derived)\b', text):
+    if claims and re.search(r'which (?:of the following|one|among the following)[^?]*\b(?:true|correct|false|incorrect|derived)\b|what does [^?]* mean\b|what is meant by', text):
         return ' ; '.join([f for r in runs for f in facts_of(r, defs)] + claims)
     extra = []
-    rel_of = re.search(rf"how is {E} 's {REL} related to {E}", text)        # "how is R's husband related to H?"
-    m = re.search(rf"how is {E} related to {E} 's {REL}", text)             # "how is H related to R's husband?"
+    rel_of = re.search(rf"how is {E} 's (?:only )?{REL} related to {E}", text)        # "how is R's husband related to H?"
+    m = re.search(rf"how is {E} related to {E} 's (?:only )?{REL}", text)             # "how is H related to R's (only) husband?"
     of_rel = m.groups() if m else None                                     # (asked person, anchor, relation)
     if of_rel is None:
         m = re.search(rf"how is {E} related to (?:the )?{REL} of {E}", text)   # "how is S related to the father of J?"
@@ -238,13 +286,16 @@ def read(tokens, options=None, ents=None) -> str | None:
     return ' ; '.join([f for r in runs for f in facts_of(r, defs)] + extra + genders + [f'ask {x} {y}'])
 
 
-def _fits(lf):
-    """An exact reading no family fits (a description that is someone named, a lost sentence): let the model read."""
+def _fits(lf, ents=None):
+    """An exact reading no family fits (a lost sentence, a reading gone wrong): let the model read. Described people
+    ("the boy") are unnamed here, as in the exam layer, so they may turn out to be someone named."""
     if lf is None:
         return None
     from .engine import solve
     from .facts import parse
-    st, bad = parse(lf)
+    desc = {e['id'] for e in ents or [] if e.get('kind') == 'desc'}
+    lf_check = re.sub(r'@(\d+)\b', lambda m: f'#{900 + int(m.group(1))}' if m.group(0) in desc else m.group(0), lf) if desc else lf
+    st, bad = parse(lf_check)
     return lf if not bad and solve(st, max_steps=20000)['ok'] else None
 
 
@@ -255,7 +306,8 @@ def with_codes(read_model, prep=None):
         from .rules import read as read_rules     # formulaic statement questions, read exactly too
         from .speech import read as read_speech   # formulaic "pointing to ..., X said ..." questions
         dec = [read(t, prep['options'], prep['ents']) if prep and t is prep['tokens'] else read(t) for t in batch]
-        dec = [d if d is not None else _fits(read_rules(t) or read_speech(t)) for d, t in zip(dec, batch)]
+        dec = [d if d is not None else _fits(read_rules(t) or read_speech(t), prep['ents'] if prep and t is prep['tokens'] else None)
+               for d, t in zip(dec, batch)]
         need = [t for t, d in zip(batch, dec) if d is None]
         got = iter(read_model(need) if need else [])
         return [d if d is not None else next(got) for d in dec]

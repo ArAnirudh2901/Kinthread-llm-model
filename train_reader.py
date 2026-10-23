@@ -13,6 +13,7 @@ import gzip
 import json
 import math
 import os
+import re
 import random
 import time
 
@@ -242,6 +243,10 @@ def main():
     ap.add_argument('--cpu', action='store_true')
     ap.add_argument('--arch', default='v10', choices=['v10', 'gpt'], help='v10: RoPE, RMSNorm, SwiGLU, copy head')
     ap.add_argument('--n_layer', type=int, default=6)
+    ap.add_argument('--n_loop', type=int, default=None, help='looped reader: run the layer stack this many times (shared weights)')
+    ap.add_argument('--loop_curriculum', default='', help="loops by share of the budget, e.g. '1:0,2:0.25,3:0.5' (retrofitted recurrence, McLeish et al. 2025)")
+    ap.add_argument('--neftune', type=float, default=0.0, help='noise on input embeddings while training (NEFTune; 5 is the paper default)')
+    ap.add_argument('--llrd', type=float, default=1.0, help='layer-wise learning-rate decay: block i gets lr * llrd^(top - i); keeps pretrained features (LP-FT)')
     ap.add_argument('--ema', type=float, default=0.999, help='decay of the averaged weights used to evaluate and save (0: off)')
     ap.add_argument('--pool', default='data/dataset', help="verified questions from build_dataset.py ('' : generate on the fly)")
     ap.add_argument('--p_deep', default='0.08,0.25', help='share of deep chains at the start and after the ramp')
@@ -261,8 +266,17 @@ def main():
     init = torch.load(a.init, map_location='cpu', weights_only=False) if not ck and a.init and os.path.exists(a.init) else None
     pre = init if init and init.get('merges') else None   # a pretrained model (pretrain_reader.py) brings its vocabulary and shape
     vocab = Vocab.from_ck(ck) if ck else Vocab.from_ck(pre) if pre else build_vocab(extra=(a.reworded or '').split(',')[0] or None)
+    if pre and not ck:   # fact words the adopted vocabulary lacks ('singles', 'gen') get new rows
+        from kinlogic.facts import vocabulary
+        missing = [t for t in vocabulary() if t != ';' and t not in vocab.stoi]
+        if missing:
+            vocab = Vocab(vocab.itos + missing, vocab.merges)
+            pre = {**pre, 'config': {**pre['config'], 'vocab_size': len(vocab)}}
+            print('vocabulary grown by', missing, flush=True)
     cfg = ck['config'] if ck else {**pre['config'], 'dropout': a.dropout, 'block_size': max(pre['config']['block_size'], a.block)} if pre else {'vocab_size': len(vocab), 'block_size': a.block, 'n_layer': a.n_layer, 'n_head': 6,
                                    'n_embd': 384, 'dropout': a.dropout, **({'arch': 'v10'} if a.arch == 'v10' else {})}
+    if a.n_loop and not ck:
+        cfg = {**cfg, 'n_loop': a.n_loop}
     model = make_model(cfg).to(device)
     if ck:
         model.load_state_dict(ck.get('raw') or ck['model'])
@@ -271,7 +285,15 @@ def main():
         model.to(device)
     print(f'{sum(p.numel() for p in model.parameters()) / 1e6:.1f}M parameters, vocab {len(vocab)}, device {device}', flush=True)
 
-    opt = torch.optim.AdamW(model.parameters(), lr=a.lr, betas=(0.9, 0.95), weight_decay=a.weight_decay)
+    model.neft = a.neftune
+    groups = {}
+    nb = len(getattr(model, 'blocks', []))
+    for n, p_ in model.named_parameters():   # layer-wise learning-rate decay: lower layers move less
+        m = re.match(r'blocks\.(\d+)\.', n)
+        sc = a.llrd ** (nb - 1 - int(m.group(1))) if m else a.llrd ** nb if n.startswith('tok_emb') else 1.0
+        groups.setdefault(sc, []).append(p_)
+    opt = torch.optim.AdamW([{'params': ps, 'scale': sc} for sc, ps in groups.items()], lr=a.lr, betas=(0.9, 0.95), weight_decay=a.weight_decay)
+    curriculum = sorted((float(f), int(k)) for k, f in (x.split(':') for x in a.loop_curriculum.split(',') if x)) if a.loop_curriculum else []
     amp = a.amp and device.type == 'cuda'
     scaler = torch.amp.GradScaler('cuda', enabled=amp)
     step, best = 0, -1.0
@@ -358,7 +380,9 @@ def main():
     while step < a.steps:
         idx, tgt, lm = collate(next(it), pad, device)
         for g in opt.param_groups:
-            g['lr'] = lr_at(step)
+            g['lr'] = lr_at(step) * g.get('scale', 1.0)
+        if curriculum:   # loops in use grow with training (retrofitted recurrence)
+            model.set_loops(max(k for f, k in curriculum if f <= step / a.steps))
         with torch.autocast('cuda', dtype=torch.float16, enabled=amp):
             loss_f, loss_lm = fact_losses(body if cfg.get('arch') != 'v10' else model, idx, tgt, lm, vocab)
             loss = loss_f + a.lm_weight * loss_lm

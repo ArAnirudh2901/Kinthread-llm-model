@@ -163,9 +163,11 @@ def _text(written):
 
 @torch.no_grad()
 def generate(model, vocab: Vocab, inputs: list[list[str]], device, k: int = 1, sample: bool = False,
-             temperature: float = 1.0, max_new: int = 96, bs: int = 32) -> list[list[tuple[str, float]]]:
+             temperature: float = 1.0, max_new: int = 96, bs: int = 32, check=None) -> list[list[tuple[str, float]]]:
     """Fact readings for each question, only ever writing valid statements.
     Beam search (k best, by mean log-probability per token) or k samples (for reinforcement learning).
+    check(facts) -> bool: beam readings it rejects (no family fits) do not count toward the k, so the search goes on
+    to consistent ones (execution-guided decoding, Wang et al. 2018); they are used only if nothing passes.
     Returns, per question, [(facts, score)] best first (samples in drawing order)."""
     model.eval()
     sep, eos = vocab.stoi['<sep>'], vocab.stoi['<eos>']
@@ -181,6 +183,7 @@ def generate(model, vocab: Vocab, inputs: list[list[str]], device, k: int = 1, s
         cache = [[kv[0][rows], kv[1][rows]] for kv in cache]
         logits, plen_h = logits[rows], plen[rows]
         done = [[] for _ in chunk]
+        spare = [[] for _ in chunk]   # finished readings `check` rejected
         for step in range(max_new):
             lp = torch.log_softmax(logits / (temperature if sample else 1.0), -1).cpu()
             cand = []   # (question, parent row, token, new log-prob)
@@ -208,7 +211,8 @@ def generate(model, vocab: Vocab, inputs: list[list[str]], device, k: int = 1, s
             for qi, h, t, sc in keep:
                 written, n = hyps[h][1], hyps[h][3] + 1
                 if t == eos or step == max_new - 1:
-                    done[qi].append((_text(written), sc / n))
+                    txt = _text(written)
+                    (done if sample or check is None or check(txt) else spare)[qi].append((txt, sc / n))
                     continue
                 nxt_hyps.append((qi, written + [';' if t == sep else vocab.itos[t]], sc, n))
                 parents.append(h)
@@ -225,7 +229,7 @@ def generate(model, vocab: Vocab, inputs: list[list[str]], device, k: int = 1, s
             hyps = nxt_hyps
             logits = _step(model, cache, torch.tensor(toks, device=device), plen_h + step, plen_h, P, step + 1)
         for qi in range(len(chunk)):
-            res = done[qi]
+            res = done[qi] or spare[qi]
             if not sample:   # best first, one entry per distinct reading
                 best = {}
                 for f, sc in res:
@@ -240,9 +244,25 @@ def decode(model, vocab: Vocab, inputs: list[list[str]], device, max_new: int = 
     return [r[0][0] for r in generate(model, vocab, inputs, device, k=1, max_new=max_new, bs=bs)]
 
 
+PONDER_PRIOR, PONDER_BETA = 0.5, 0.01   # geometric prior on the stopping loop and its weight (PonderNet, Banino et al. 2021)
+
+
 def fact_losses(model, idx, tgt, lm, vocab):
     """Mean cross-entropy of the facts (copy head included for v10) and of the question's words."""
-    if getattr(model, 'arch', None) == 'v10':
+    if getattr(model, 'arch', None) == 'v10' and getattr(model, 'loops_now', 1) > 1:   # looped reader: PonderNet loss
+        mt = tgt != -100
+        lps, lams, h = model.fact_logprobs_loops(idx, mt, vocab.stoi['<c>'])
+        y = tgt[mt][:, None]
+        nll = torch.stack([-lp.gather(1, y)[:, 0] for lp in lps], 1)              # (N, R): loss if stopping after loop r
+        lam = torch.stack(lams, 1).clamp(1e-4, 1 - 1e-4)
+        lam = torch.cat([lam[:, :-1], torch.ones_like(lam[:, -1:])], 1)          # the last loop always stops
+        keep = torch.cumprod(torch.cat([torch.ones_like(lam[:, :1]), 1 - lam[:, :-1]], 1), 1)
+        p = keep * lam                                                            # p_r: stop exactly after loop r
+        prior = torch.tensor([PONDER_PRIOR * (1 - PONDER_PRIOR) ** r for r in range(nll.size(1))], device=idx.device)
+        prior = prior / prior.sum()
+        kl = (p * ((p + 1e-9).log() - prior.log())).sum(1)
+        loss_f = (p * nll).sum(1).mean() + PONDER_BETA * kl.mean()
+    elif getattr(model, 'arch', None) == 'v10':
         mt = tgt != -100
         lp, h = model.fact_logprobs(idx, mt, vocab.stoi['<c>'])
         loss_f = F.nll_loss(lp, tgt[mt])
@@ -265,3 +285,38 @@ def fact_token_logprobs(model, idx, tgt, vocab):
     out = torch.zeros(tgt.shape, device=idx.device)
     out[mt] = lp.gather(1, tgt[mt][:, None])[:, 0]
     return out, mt
+
+
+@torch.no_grad()
+def halt_prob(model, vocab: Vocab, tokens, lf: str, r: int, device) -> float:
+    """The looped reader's own estimate that `lf` is finished after r loops: P(stopped by loop r), averaged over its tokens."""
+    enc = encode_example(vocab, tokens, lf, model.block_size)
+    if enc is None or getattr(model, 'exit_gate', None) is None:
+        return 1.0
+    idx, tgt, _ = collate([enc], vocab.stoi['<pad>'], device)
+    _, lams = model.hidden_loops(idx)
+    m = tgt != -100
+    lam = torch.stack([x[m] for x in lams[:r]], 1)
+    return float((1 - torch.prod(1 - lam, 1)).mean())
+
+
+def answer_looped(text: str, model, vocab: Vocab, device, k: int = 8, tau_lambda: float = 0.5, tau_vote: float = 0.6):
+    """Halting with two judges: after r loops the answer stands when the engine accepts it (a family fits, the vote is
+    clear) and the exit gate agrees the reading is finished (lambda); otherwise one more loop, up to the model's maximum."""
+    from kinlogic.exam import answer
+    from kinlogic.prepare import prepare
+    toks = prepare(text)['tokens']
+    R, res = getattr(model, 'n_loop', 1), {}
+    try:
+        for r in range(1, R + 1):
+            model.set_loops(r) if R > 1 else None
+            res = answer(text, lambda b: generate(model, vocab, b, device, k=k))
+            if r == R:
+                break
+            engine_ok = res.get('status') not in ('error', 'none', 'contradiction') and res.get('confidence', 1.0) >= tau_vote
+            if engine_ok and res.get('facts') and halt_prob(model, vocab, toks, res['facts'], r, device) >= tau_lambda:
+                break
+        return {**res, 'loops': r}
+    finally:
+        if R > 1:
+            model.set_loops(R)
