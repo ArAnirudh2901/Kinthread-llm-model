@@ -26,12 +26,13 @@ SLOT = {'M': 'fa', 'F': 'mo'}
 
 class World:
     """One family under construction. People are ints; merged people share a union-find root."""
-    __slots__ = ('uf', 'gen', 'fa', 'mo', 'sp', 'named', 'ent', 'frame', 'distinct', 'choices', 'nonkin')
+    __slots__ = ('uf', 'gen', 'fa', 'mo', 'sp', 'named', 'ent', 'frame', 'distinct', 'choices', 'nonkin', 'prof')
 
     def __init__(self):
         self.uf, self.gen, self.fa, self.mo, self.sp = [], [], [], [], []
         self.named, self.ent, self.frame = [], [], []
         self.distinct, self.choices, self.nonkin = [], [], []
+        self.prof = []   # profession of each person ("the doctor"): one person per profession
 
     def clone(self) -> World:
         w = World.__new__(World)
@@ -45,6 +46,7 @@ class World:
         i = len(self.uf)
         self.uf.append(i); self.gen.append(None); self.fa.append(-1); self.mo.append(-1); self.sp.append(-1)
         self.named.append(bool(ent) and is_named(ent)); self.ent.append(ent); self.frame.append(frame)
+        self.prof.append(None)
         return i
 
     def find(self, i: int) -> int:
@@ -139,6 +141,10 @@ class World:
             if self.gen[a] and self.gen[a] != gb:
                 return False
             self.gen[a] = gb
+        if self.prof[b]:
+            if self.prof[a] and self.prof[a] != self.prof[b]:
+                return False
+            self.prof[a] = self.prof[b]
         self.uf[b] = a
         self.frame[a] = self.frame[a] and self.frame[b]
         pairs = []
@@ -442,9 +448,9 @@ def _finish(w, run: _Run):
                 yield from _closed_family(w2, run)
 
     for w2 in _identities(w, run):
-        for w4 in counted(w2):
-            for w4b in _role_totals(w4, run):
-                for w5 in _gender_totals(w4b, run):
+        for w3 in counted(w2):
+            for w4 in _identities(w3, run):   # closed-family merges can add relatives an "only" word must cover
+                for w5 in (w6 for w5a in _role_totals(w4, run) for w6 in _gender_totals(w5a, run)):
                     for w6 in _gender_links(w5, run.links, run):
                         if _final_ok(w6, run):
                             yield w6
@@ -997,7 +1003,36 @@ def _assume(w: World, priors: dict, ids: dict):
 CLOSED_FEWEST = True
 
 
-def solve(stmts: list[dict], label=lambda e: e, asks=(), parts=None, people=(), priors=None, max_steps: int = 20000,
+CLOSED_COUPLES = True   # closed family: a member's child with a married member is the couple's child (exam convention)
+
+
+def solve(stmts, *args, **kw) -> dict:
+    """Solves, then in a closed family adds "the couple's child" facts every family agrees on and solves again."""
+    r = _solve(stmts, *args, **kw)
+    if not (CLOSED_COUPLES and r.get('ok') and r.get('worlds') and any(s['t'] == 'members' for s in stmts)):
+        return r
+    named = {}
+    for e, i in r['ids'].items():
+        if e.startswith('@'):
+            named.setdefault(i, e)
+    def proposals(w):
+        ent = {w.find(i): e for i, e in named.items()}
+        out = set()
+        for c, ce in ent.items():
+            for slot, other in (('fa', 'mo'), ('mo', 'fa')):
+                p = w.rel(c, slot)
+                if p >= 0 and w.rel(c, other) < 0 and p in ent and w.spouse(p) in ent:
+                    out.add((ent[w.spouse(p)], ce))
+        return out
+    common = set.intersection(*(proposals(w) for w in r['worlds']))
+    if not common:
+        return r
+    extra = [{'t': 'rel', 'x': x, 'r': 'child', 'y': y, 'neg': False, 'only': False, 'side': None} for x, y in sorted(common)]
+    r2 = _solve(list(stmts) + extra, *args, **kw)
+    return r2 if r2.get('ok') and r2.get('worlds') else r
+
+
+def _solve(stmts: list[dict], label=lambda e: e, asks=(), parts=None, people=(), priors=None, max_steps: int = 20000,
           max_families: int = 2000, smallest: bool = False) -> dict:
     """Solves parsed fact statements (facts.parse).
 
@@ -1038,9 +1073,20 @@ def solve(stmts: list[dict], label=lambda e: e, asks=(), parts=None, people=(), 
     for _ in range((members or 0) - len(run.named)):   # members the text never names
         run.extra.append(w0.add())
     facts, questions = [], []
+    prof_ok = True
+    for s in premise:   # professions first: two people with one profession are one person
+        if s['t'] == 'prof' and prof_ok:
+            x = w0.find(ids[s['x']])
+            holder = next((r for r in w0.roots() if w0.prof[r] == s['p'] and r != x and not (w0.named[r] and w0.named[x])), None)   # "the doctor": the one doctor; two named people may share a profession
+            if (holder is not None and not (w0.unify(holder, x) and w0.normalize())) or (w0.prof[w0.find(x)] not in (None, s['p'])):
+                prof_ok = False
+            else:
+                w0.prof[w0.find(x)] = s['p']
     for s in premise:
         t = s['t']
-        if t in ('ask', 'who', 'count', 'gender?', 'pair'):
+        if t == 'prof':
+            continue
+        if t in ('ask', 'who', 'count', 'gender?', 'pair', 'prof?'):
             questions.append(s)
         elif t == 'rel':
             if s.get('neg'):
@@ -1065,7 +1111,7 @@ def solve(stmts: list[dict], label=lambda e: e, asks=(), parts=None, people=(), 
             setattr(run, t, s['n'])
     questions += [{'t': 'ask', 'x': x, 'y': y, 'picked': True} for x, y in asks]
     worlds = []
-    for w in _search(w0, facts, run):
+    for w in (_search(w0, facts, run) if prof_ok else []):
         worlds.append(w)
         if len(worlds) >= max_families:
             run.cut = True
@@ -1101,6 +1147,10 @@ def solve(stmts: list[dict], label=lambda e: e, asks=(), parts=None, people=(), 
                     'against': against}
             if q['t'] == 'ask':
                 results.append({**relation_in(w, ids[q['x']], ids[q['y']]), **base})
+            elif q['t'] == 'who' and q['r'].startswith('prof:'):   # "who is the doctor?"
+                holder = [r for r in w.roots() if w.prof[r] == q['r'][5:]]
+                names = sorted(w.ent[n] for n in holder if w.ent[n] and is_named(w.ent[n]))
+                results.append({'key': ','.join(names) or ('unnamed' if holder else 'none'), 'names': names, **base})
             elif q['t'] == 'who':
                 found = w.relatives(ids[q['x']], q['r'], q.get('side'))
                 named = lambda ns: sorted(w.ent[n] for n in ns if w.ent[n] and is_named(w.ent[n]))
@@ -1112,6 +1162,8 @@ def solve(stmts: list[dict], label=lambda e: e, asks=(), parts=None, people=(), 
                     more = named(found + maybe)
                     results.append({'key': ','.join(more), 'names': more, **base,
                                     'conds': base['conds'] + [f"{label(w.ent[n])}'s gender is not given" for n in maybe if w.ent[n]]})
+            elif q['t'] == 'prof?':   # "what is the profession of X?"
+                results.append({'key': w.prof[w.find(ids[q['x']])] or 'unknown', **base})
             elif q['t'] == 'gender?':
                 g = w.g(ids[q['x']])
                 results.append({'key': {'M': 'male', 'F': 'female'}.get(g, 'unknown'), **base})
