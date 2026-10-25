@@ -8,6 +8,7 @@ sufficiency, and coded "which expression shows..." questions (each option is rea
 """
 from __future__ import annotations
 
+import collections
 import os
 import re
 
@@ -212,11 +213,18 @@ def answer_corrected(text: str, read, threshold: float = 0.6, priors: dict | Non
     return cur if cur.get('status') not in fails and cur.get('confidence', 1.0) >= threshold else best
 
 
-def _answer(text: str, read, priors: dict | None = None) -> dict:
-    """read may return one reading per question or several, best first, optionally with scores (mean log-probability
-    per token). Every reading is solved; readings that fail (contradiction, no question) drop out; the rest vote for
-    their option, weighted by the reader's confidence. confidence: the winning option's share of the votes."""
-    import math
+_VERIFIER = []
+
+
+def _verifier():
+    if not _VERIFIER:
+        from .verifier import Verifier
+        _VERIFIER.append(Verifier.load(os.environ.get('KIN_VERIFIER')))
+    return _VERIFIER[0]
+
+
+def candidates(text: str, read, priors: dict | None = None):
+    """(prepared question, [(engine result, reader score)]) for every reading."""
     from .codes import with_codes
     p = prepare(text)
     read = with_codes(read, p)   # coded questions are read exactly; the model reads the rest
@@ -230,11 +238,26 @@ def _answer(text: str, read, priors: dict | None = None) -> dict:
             res = {'answer': 'error', 'option': None, 'status': 'error', 'explanation': f'{type(e).__name__}: {e}', 'facts': lf}
         res['reading'] = k
         results.append((res, score))
+    return p, results
+
+
+def _answer(text: str, read, priors: dict | None = None) -> dict:
+    """read may return one reading per question or several, best first, optionally with scores (mean log-probability
+    per token). Every reading is solved; readings that fail (contradiction, no question) drop out; the rest vote for
+    their option, weighted by the reader's confidence. confidence: the winning option's share of the votes."""
+    import math
+    p, results = candidates(text, read, priors)
     good = [(r, sc) for r, sc in results if r['status'] not in ('error', 'contradiction', 'none')]
     if not good:
         return {**results[0][0], 'confidence': 0.0}
     top = max(sc for _, sc in good)
     weights = [math.exp(8 * (sc - top)) for _, sc in good]   # sharper than the raw per-token average
+    v = _verifier()
+    if v:   # learned verifier (kinlogic/verifier.py): probability each reading is right
+        from .verifier import features
+        key = lambda r: r['option'] if p['options'] else r['answer']
+        cnt = collections.Counter(key(r) for r, _ in good)
+        weights = [v.prob(features(p, r, sc, top, cnt[key(r)] / len(good), i, len(good))) for i, (r, sc) in enumerate(good)]
     if COVER:   # a reading that leaves a named person of the question out has likely dropped a sentence
         people = {t for t in p['tokens'] if re.fullmatch(r'@\d+', t)}
         weights = [wt * 0.35 ** len(people - set(re.findall(r'@\d+', r.get('facts') or ''))) for (r, _), wt in zip(good, weights)]
@@ -656,6 +679,73 @@ def with_split(read, min_sentences: int = 3):
                 prev = out[b] if isinstance(out[b], list) else [(out[b], 0.0)]
                 top = max((g[1] for g in prev if not isinstance(g, str)), default=0.0)
                 out[b] = list(prev) + [(lf, top)]
+        return out
+    return run
+
+
+QFACTS = ('ask', 'who', 'count', 'gender', 'pair', 'prof')
+WHOLE = ('members', 'couples', 'generations', 'singles')   # facts about the whole family: checked only on full readings
+
+
+def _readings(got):
+    """[(facts, score)] from one read() result, best first."""
+    if isinstance(got, str):
+        return [(got, 0.0)]
+    return [(g, 0.0) if isinstance(g, str) else (g[0], g[1]) for g in got or []]
+
+
+def with_split_search(read, k: int = 3, beam: int = 4, min_sentences: int = 3):
+    """Sentence-level beam search checked by the engine (as SentBS and execution-guided decoding): each statement
+    sentence is read on its own (k readings), sentences are joined in order keeping the `beam` most likely joins the
+    engine finds consistent, and those whole readings join the vote. A misread sentence usually contradicts the others,
+    so the engine picks which reading of it fits."""
+    def consistent(facts):
+        try:
+            stmts, _ = parse(' ; '.join(f for f in facts if f.split()[0] not in WHOLE))
+            return bool(stmts) is False or solve(stmts).get('ok', True)
+        except Exception:
+            return True
+
+    def renumber(lf, n):
+        out, ren = [], {}
+        for st in (x.split() for x in lf.split(';') if x.strip()):
+            if not st or st[0] in QFACTS:
+                continue
+            for i, t in enumerate(st):
+                if t[0] == '#':
+                    if t not in ren:
+                        n += 1
+                        ren[t] = f'#{n}'
+                    st[i] = ren[t]
+            out.append(' '.join(st))
+        return out, n
+
+    def run(batch):
+        out = read(batch)
+        for b, toks in enumerate(batch):
+            sents = _sentences(list(toks))
+            if len(sents) < min_sentences or not any(t == '?' for t in sents[-1]):
+                continue
+            q = sents[-1]
+            parts = read([s + q for s in sents[:-1]] + [q])
+            qr = _readings(parts[-1])
+            question = [x.strip() for x in (qr[0][0] if qr else '').split(';') if x.strip().split()[:1] and x.split()[0] in QFACTS]
+            if not question:
+                continue
+            beams = [([], 0.0, 0)]
+            for got in parts[:-1]:
+                opts = _readings(got)[:k] or [('', 0.0)]
+                nxt = []
+                for facts, sc, n in beams:
+                    for lf, s2 in opts:
+                        f2, n2 = renumber(lf, n)
+                        nxt.append((facts + f2, sc + s2, n2))
+                nxt.sort(key=lambda x: -x[1])
+                kept = [c for c in nxt[:beam * k] if consistent(c[0])][:beam]
+                beams = kept or nxt[:1]
+            prev = out[b] if isinstance(out[b], list) else [(out[b], 0.0)]
+            extra = [(' ; '.join(list(dict.fromkeys(f)) + question), sc / max(1, len(parts) - 1)) for f, sc, _ in beams]
+            out[b] = list(prev) + extra
         return out
     return run
 
