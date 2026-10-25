@@ -1,0 +1,381 @@
+{
+ "sources": {
+  "mix_r8.jsonl.gz": 22597,
+  "pool-kinds": 7403
+ },
+ "defects": {
+  "repeated texts (extra copies)": "6135 (20.45%)",
+  "no question fact": "664 (2.21%)",
+  "facts near/over the 96-token decode limit": "3 (0.01%)"
+ },
+ "kinds real vs train": {
+  "long text": [
+   0.01,
+   0.012
+  ],
+  "sufficiency": [
+   0.001,
+   0.025
+  ],
+  "puzzle": [
+   0.137,
+   0.162
+  ],
+  "statements": [
+   0.3,
+   0.487
+  ],
+  "coded": [
+   0.234,
+   0.0
+  ],
+  "speech": [
+   0.317,
+   0.314
+  ]
+ },
+ "fact words: real exact readings (458) vs train": {
+  "members": [
+   0.155,
+   0.165
+  ],
+  "couples": [
+   0.031,
+   0.105
+  ],
+  "generations": [
+   0.103,
+   0.069
+  ],
+  "singles": [
+   0.052,
+   0.059
+  ],
+  "claim": [
+   0.0,
+   0.086
+  ],
+  "part": [
+   0.0,
+   0.051
+  ],
+  "count": [
+   0.02,
+   0.025
+  ],
+  "who": [
+   0.033,
+   0.063
+  ],
+  "pair": [
+   0.0,
+   0.028
+  ],
+  "gen": [
+   0.103,
+   0.102
+  ],
+  "has": [
+   0.07,
+   0.034
+  ],
+  "only": [
+   0.341,
+   0.257
+  ],
+  "not": [
+   0.068,
+   0.021
+  ],
+  "same": [
+   0.013,
+   0.007
+  ],
+  "opposite": [
+   0.017,
+   0.01
+  ],
+  "prof": [
+   0.0,
+   0.0
+  ],
+  "male": [
+   0.504,
+   0.5
+  ],
+  "female": [
+   0.297,
+   0.334
+  ],
+  "stranger": [
+   0.0,
+   0.001
+  ],
+  "friend": [
+   0.0,
+   0.005
+  ],
+  "paternal": [
+   0.007,
+   0.024
+  ],
+  "maternal": [
+   0.037,
+   0.023
+  ],
+  "spouse": [
+   0.157,
+   0.07
+  ],
+  "sibling": [
+   0.052,
+   0.044
+  ],
+  "child": [
+   0.076,
+   0.019
+  ],
+  "parent": [
+   0.002,
+   0.013
+  ],
+  "cousin": [
+   0.009,
+   0.004
+  ],
+  "nephew": [
+   0.026,
+   0.012
+  ],
+  "niece": [
+   0.013,
+   0.012
+  ],
+  "uncle": [
+   0.076,
+   0.019
+  ],
+  "aunt": [
+   0.037,
+   0.018
+  ],
+  "grand": [
+   0.253,
+   0.128
+  ],
+  "great": [
+   0.0,
+   0.025
+  ],
+  "in-law": [
+   0.212,
+   0.216
+  ],
+  "unmarried": [
+   0.028,
+   0.009
+  ],
+  "fathers": [
+   0.017,
+   0.022
+  ],
+  "brothers": [
+   0.017,
+   0.016
+  ]
+ },
+ "phrases real vs train (gaps only)": {
+  "who is (no comma)": [
+   0.046,
+   0.024
+  ],
+  "paternal / maternal": [
+   0.074,
+   0.046
+  ],
+  "code symbols (means)": [
+   0.245,
+   0.143
+  ],
+  "if-conditional (if X is ... , how)": [
+   0.079,
+   0.042
+  ],
+  "coordination (R of Y and the S of Z)": [
+   0.035,
+   0.019
+  ],
+  "married to": [
+   0.116,
+   0.058
+  ]
+ },
+ "tokens p50/p90/p99/max real vs train": [
+  [
+   42,
+   96,
+   143,
+   255
+  ],
+  [
+   38,
+   88,
+   118,
+   166
+  ]
+ ],
+ "people p50/p90/max real vs train": [
+  [
+   4,
+   8,
+   18
+  ],
+  [
+   4,
+   8,
+   23
+  ]
+ ],
+ "people per question real": {
+  "0": 2,
+  "1": 11,
+  "2": 401,
+  "3": 97,
+  "4": 225,
+  "5": 153,
+  "6": 171,
+  "7": 124,
+  "8": 120,
+  "9": 50,
+  "10": 20,
+  "11": 9,
+  "12": 20
+ },
+ "people per question train": {
+  "0": 108,
+  "2": 10848,
+  "3": 3908,
+  "4": 4011,
+  "5": 3702,
+  "6": 2551,
+  "7": 1650,
+  "8": 1336,
+  "9": 605,
+  "10": 489,
+  "11": 183,
+  "12": 609
+ },
+ "answers real vs train (real >= 1%)": {
+  "brother": [
+   0.059,
+   0.047
+  ],
+  "mother": [
+   0.057,
+   0.054
+  ],
+  "uncle": [
+   0.055,
+   0.034
+  ],
+  "sister": [
+   0.054,
+   0.034
+  ],
+  "son": [
+   0.051,
+   0.04
+  ],
+  "aunt": [
+   0.048,
+   0.034
+  ],
+  "cousin": [
+   0.044,
+   0.035
+  ],
+  "grandson": [
+   0.041,
+   0.032
+  ],
+  "father": [
+   0.041,
+   0.043
+  ],
+  "brother-in-law": [
+   0.034,
+   0.038
+  ],
+  "nephew": [
+   0.034,
+   0.021
+  ],
+  "wife": [
+   0.03,
+   0.031
+  ],
+  "daughter": [
+   0.025,
+   0.035
+  ],
+  "niece": [
+   0.025,
+   0.024
+  ],
+  "grandfather": [
+   0.024,
+   0.021
+  ],
+  "father-in-law": [
+   0.022,
+   0.025
+  ],
+  "grandmother": [
+   0.022,
+   0.018
+  ],
+  "husband": [
+   0.017,
+   0.022
+  ],
+  "sister-in-law": [
+   0.017,
+   0.028
+  ],
+  "mother-in-law": [
+   0.015,
+   0.025
+  ],
+  "daughter-in-law": [
+   0.015,
+   0.023
+  ],
+  "son-in-law": [
+   0.014,
+   0.027
+  ],
+  "granddaughter": [
+   0.013,
+   0.013
+  ]
+ },
+ "answers train-only top": {
+  "several": 0.087,
+  "none": 0.017,
+  "sibling-in-law": 0.009,
+  "co-sister": 0.006,
+  "granddaughter-in-law": 0.005,
+  "co-brother": 0.004,
+  "grandfather-in-law": 0.004,
+  "grandmother-in-law": 0.004,
+  "child": 0.003,
+  "great-great-great-great-grand-niece": 0.003,
+  "grandson-in-law": 0.002,
+  "sibling": 0.002,
+  "cousin 6 times removed": 0.002,
+  "child-in-law": 0.002,
+  "husband's father's sister's son": 0.002,
+  "father's brother's daughter's husband": 0.002,
+  "daughter's son's son's wife": 0.002
+ }
+}
