@@ -8,6 +8,11 @@ with a chain of thought, a 5.1M-parameter GPT that finds person names, and a sma
 that runs both in a browser. The trained checkpoints, the training data and the exported browser model are included,
 so you can ask questions, evaluate, retrain or export straight after cloning.
 
+The website currently uses the v8 browser model. The selected v10-r8p checkpoint is a release candidate, not yet the
+website model: its WASM forward/cache/decode primitives pass numerical parity checks, but the full browser answer path
+through grammar decoding, `kinlogic`, and exam handling is not integrated. See the website's
+[migration plan](../../Web_Dev/kinthread/MODEL_UPGRADE_PLAN.md) before attempting a site release.
+
 ## Contents
 
 ```text

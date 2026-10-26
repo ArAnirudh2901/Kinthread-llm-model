@@ -37,6 +37,10 @@ option matching, "not related", "Either X or Y"). Answer-time boosters (`eval/ru
 | r8 / r8p v5 | dataset v8 balance, prefix-LM option, no-relation | old dev subset: r7 72.9, r8 73.5, r8p 74.3 |
 | final (Oct 25-26) | per-type balanced mix (build_mix), leak guard, verifier + boosters, picked on full dev | r8p + all boosters: dev 73.9% fair / 77.2% verified; locked test 68.8% / 72.2% vs r7 66.2% / 70.5% (+2.6 / +1.7 points) |
 
+Website release note (2026-10-26): release identity and update integrity are implemented and locally verified in
+Chrome, but the active model remains v8. The selected v10-r8p WASM primitive checks do not yet cover the full browser
+answer pipeline. See `~/Web_Dev/kinthread/MODEL_UPGRADE_PLAN.md` before changing the website release.
+
 ## Data (how to rebuild)
 - Verified pool `data/dataset_v7` (Drive / model repo); extras: rewrites, STaR r2/r3, teacher rows, `pairs_v1`
   (+8k no-relation rows from `build_norel.py`).

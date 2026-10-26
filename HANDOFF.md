@@ -52,3 +52,13 @@ The canonical source exporter produced `/tmp/kinthread-v10-final` from `runs/v10
 The canonical LLM source has a 50-prompt deterministic C/WASM parity check passing in SIMD and scalar against PyTorch (13–101 tokens). Maximum: prefix 2.86e-5, decode 1.38e-5, logits 1.53e-5, copy keys 2.38e-5, mixed probabilities 7.82e-5. This does not validate the JS wrapper, beam search, end-to-end answers, or mobile budgets. Site's separate resource-aware v8 update is live at `https://kinthread.pages.dev`.
 
 The 50-prompt C/WASM parity cases also now pass through `ReaderWasm` JS wrapper prefill/cache/decode in scalar and SIMD (max logp 2.27e-4; probability 7.82e-5). Full Python beam and answer parity remain pending.
+
+## Website release verification (2026-10-26)
+Kinthread (`~/Web_Dev/kinthread`) now has release-manifest checks and a returning-browser model update flow, but the
+active identity is intentionally still v8 (`af70872adbce`). Chrome on a local preview verified successful cached
+replacement and inference, rejected a same-size corrupted part while preserving the prior install, and blocked model
+startup when a tampered manifest advertised `v9-test` instead of the app's expected v8. The update notice was checked
+in dark and light themes; CSS stacks it below 560px, but a real mobile viewport was not tested. Website validation
+passed (`bun run check`: lint, 134 tests, static build). The selected v10-r8p model is not releasable yet: full reader
+grammar/beam, `kinlogic`, and exam pipeline parity remain incomplete. No deploy, commit, or push was made. See
+`~/Web_Dev/kinthread/MODEL_UPGRADE_PLAN.md` for details.
