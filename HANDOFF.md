@@ -66,3 +66,9 @@ grammar/beam, `kinlogic`, and exam pipeline parity remain incomplete. No deploy,
 ## Update 2026-10-27 — threaded v10 validation
 
 RoPE precomputation and SIMD/scalar pthread reader builds now exist in canonical source and this mirror. The website selects threads only on isolated devices reporting at least 8 GB; low/unknown-memory profiles remain single-threaded. Threaded builds reserve 384 MiB because branching beam hypotheses consume distinct KV slots. 50-prompt wrapper parity passes. A Node/Pyodide end-to-end test and native Chrome local run return the expected three-link paternal-cousin answer; Chrome used SIMD/two threads and took 9,632 ms. Its score is tentative and uncalibrated. This is one smoke test, not broad parity. Production remains v8; locked-test accuracy is 68.8% fair / 72.2% verified (<85%). No deployment, commit, or push.
+
+## Current handoff — 2026-10-27
+
+The owner explicitly authorized pushing and publishing v10-r8p. Source, model mirror, and website commits are pushed: LLM-From-Scratch/main 11508ba; Kinthread-llm-model/v9-reader 57455fc; Kinthread/main 6f32924. Cloudflare Pages project kinthread now serves v10-r8p. The live no-cache release manifest matched checkpoint SHA-256 38c289d351d6517b5cde1bc9fb64ea97bd33eee193639d6351edda52fdfd7a52, content hash c4a1d87737c6, and runtime f608eed15e9b. SHA-256 and size verification passed for all 66 model assets (127,187,553 bytes) and 20 runtime files (14,012,183 bytes). Selected weights remain exact fp32.
+
+This publication was owner-authorized before all release gates were complete. Locked-test accuracy is 68.8% fair / 72.2% verified (<85%); broad browser/Python parity, confidence calibration, and low-power/mobile budgets remain open. The 9,632 ms Chrome paternal-cousin result is one tentative smoke check, not an accuracy claim.
