@@ -62,3 +62,7 @@ in dark and light themes; CSS stacks it below 560px, but a real mobile viewport 
 passed (`bun run check`: lint, 134 tests, static build). The selected v10-r8p model is not releasable yet: full reader
 grammar/beam, `kinlogic`, and exam pipeline parity remain incomplete. No deploy, commit, or push was made. See
 `~/Web_Dev/kinthread/MODEL_UPGRADE_PLAN.md` for details.
+
+## Update 2026-10-27 — threaded v10 validation
+
+RoPE precomputation and SIMD/scalar pthread reader builds now exist in canonical source and this mirror. The website selects threads only on isolated devices reporting at least 8 GB; low/unknown-memory profiles remain single-threaded. Threaded builds reserve 384 MiB because branching beam hypotheses consume distinct KV slots. 50-prompt wrapper parity passes. A Node/Pyodide end-to-end test and native Chrome local run return the expected three-link paternal-cousin answer; Chrome used SIMD/two threads and took 9,632 ms. Its score is tentative and uncalibrated. This is one smoke test, not broad parity. Production remains v8; locked-test accuracy is 68.8% fair / 72.2% verified (<85%). No deployment, commit, or push.

@@ -3,14 +3,17 @@
 **The from-scratch language model behind [Kinthread](https://github.com/ArAnirudh2901/Kinthread): it reads a short
 family story and works out how two people are related, showing its reasoning step by step.**
 
-Everything here was written and trained from scratch in PyTorch: a 13M-parameter GPT that answers kinship questions
-with a chain of thought, a 5.1M-parameter GPT that finds person names, and a small C engine compiled to WebAssembly
-that runs both in a browser. The trained checkpoints, the training data and the exported browser model are included,
-so you can ask questions, evaluate, retrain or export straight after cloning.
+Everything here was written and trained from scratch in PyTorch: the legacy 13M-parameter v8 relation model, the
+selected 39.5M-parameter v10 reader, and a 5.1M-parameter name finder. Small C engines compiled to WebAssembly run
+the browser models. The trained checkpoints, training data and exported browser model are included, so you can ask
+questions, evaluate, retrain or export straight after cloning.
 
-The website currently uses the v8 browser model. The selected v10-r8p checkpoint is a release candidate, not yet the
-website model: its WASM forward/cache/decode primitives pass numerical parity checks, but the full browser answer path
-through grammar decoding, `kinlogic`, and exam handling is not integrated. See the website's
+The website's production deployment still uses the v8 browser model. The v10-r8p candidate now passes a local
+Chrome three-link answer smoke check on runtime `f608eed15e9b`: it returned the expected paternal-cousin relation
+as `assumed`/tentative with an uncalibrated score of 0.95 in 9.6 seconds using two WebAssembly threads. A
+Node/Pyodide end-to-end regression also passes. These checks do not establish broad browser parity or calibrated
+accuracy. The locked test remains 68.8% fair / 72.2% verified, below the 85% target. Broader parity, accuracy,
+calibration, and device performance remain release gates. See the website's
 [migration plan](../../Web_Dev/kinthread/MODEL_UPGRADE_PLAN.md) before attempting a site release.
 
 ## Contents
@@ -90,8 +93,12 @@ cd web && ./build.sh          # needs Emscripten (emcc): relaxed SIMD / SIMD / s
 node test/test_node.mjs       # the engine must match the Python reference on test/golden.json
 ```
 
-The export is lossless: the original 32-bit weights, not quantized. In the browser the outputs match PyTorch to
-within 1.5 × 10⁻⁵. Kinthread ships this exported model.
+The v8 export is lossless: original 32-bit weights, not quantized. The v10 reader prototype is separate
+(`reader_engine.c`, `reader.js`) and has additional SIMD/scalar single-thread and pthread builds. The 50-prompt
+wrapper fixtures match PyTorch through prefix prefill, KV-cache growth, and one cached decode (max log-prob delta
+`2.27e-4`, probability delta `7.82e-5`). The website candidate adds the grammar/beam/Pyodide answer path and now
+passes one local three-link end-to-end smoke check, but does not yet meet its full browser parity or accuracy gates.
+Production still ships v8; see the website migration plan before changing that release.
 
 ## Integrity
 
