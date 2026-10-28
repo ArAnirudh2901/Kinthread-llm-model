@@ -75,8 +75,8 @@ def correct(r, res):
     return bool(mv_w and mv_g and len(mv_w) == len(mv_g) and all(a == c and (g is None or h is None or g == h) for (a, g), (c, h) in zip(mv_w, mv_g)))
 
 
-def run(read, rows, read_more=None, threshold=0.6, fix=False, answer_fn=None):
-    from eval.real_clean import broken
+def run(read, rows, read_more=None, threshold=0.6, fix=False, answer_fn=None, tracer=None):
+    from eval.real_clean import broken, category
     from eval.verify_keys import OUT as KEYS, qhash
     keys = {}
     for f in sorted(glob.glob(KEYS.replace('.json', '*.json'))):   # checked answer keys (eval.verify_keys, all shards)
@@ -84,9 +84,12 @@ def run(read, rows, read_more=None, threshold=0.6, fix=False, answer_fn=None):
     by = collections.defaultdict(lambda: [0, 0])
     sp = collections.defaultdict(lambda: [0, 0])
     misses, oks = [], []
-    for r in rows:
+    solve = lambda text: answer_fn(text) if answer_fn else answer_corrected(text, read, threshold) if fix else answer_adaptive(text, read, read_more, threshold) if read_more else answer(text, read)
+    for i, r in enumerate(rows):
         text = as_text(r)
-        res = answer_fn(text) if answer_fn else answer_corrected(text, read, threshold) if fix else answer_adaptive(text, read, read_more, threshold) if read_more else answer(text, read)
+        if tracer:
+            tracer.begin(text)
+        res = solve(text)
         ok = correct(r, res)
         oks.append(ok)
         for k in (split_of(r), f'{split_of(r)} fair' if not broken(r) else None):
@@ -97,6 +100,9 @@ def run(read, rows, read_more=None, threshold=0.6, fix=False, answer_fn=None):
         if v and v['status'] in ('confirmed', 'corrected'):   # wrong keys fixed, ambiguous questions left out
             sp[f'{split_of(r)} verified'][0] += res.get('option') == v['key']
             sp[f'{split_of(r)} verified'][1] += 1
+        if tracer:
+            tracer.end(r, res, ok, solve, i=i, split=split_of(r), site=r['site'], category=category(r), fair=not broken(r),
+                       verified_key=v['key'] if v and v['status'] in ('confirmed', 'corrected') else None)
         k = by[r['site']]
         k[0] += ok; k[1] += 1
         if not ok:
@@ -137,6 +143,8 @@ if __name__ == '__main__':
     ap.add_argument('--loops', type=int, default=None, help='looped reader: most loops to run (default: all it was trained with)')
     ap.add_argument('--halt', action='store_true', help='looped reader: stop early when the engine accepts the reading and the exit gate agrees (reader.answer_looped)')
     ap.add_argument('--correct', action='store_true', help='re-read and correct unsure readings (exam.answer_corrected; needs a reader trained on correction rows)')
+    ap.add_argument('--trace', default=None, help='per-question trace (JSONL: route, every reading, engine results) for eval.trace_report')
+    ap.add_argument('--trace_shadow', action='store_true', help='with --trace: also answer exactly-read questions with the exact readers off (the model alone)')
     a = ap.parse_args()
     dev = get_device(force_cpu=a.cpu)
     model, vocab = load(a.ckpt, dev)
@@ -196,7 +204,13 @@ if __name__ == '__main__':
                 return outs[0]
             best = votes.most_common(1)[0][0]
             return next(o for o in outs if o.get('option') == best)
-    score, misses = run(read, rows, more, a.adaptive or 0.6, fix=a.correct, answer_fn=fn)
+    tracer = None
+    if a.trace:
+        from eval.trace import Tracer
+        tracer = Tracer(a.trace, shadow=a.trace_shadow).install()
+    score, misses = run(read, rows, more, a.adaptive or 0.6, fix=a.correct, answer_fn=fn, tracer=tracer)
+    if tracer:
+        tracer.close()   # perturbed / reworded copies below are scored untraced
     print(json.dumps({k: v for k, v in score.items() if k != 'ok'}, indent=1))
     if a.perturb:
         from eval.perturb import compare, variants

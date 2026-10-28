@@ -110,3 +110,26 @@ Before training, use a stratified long-story development set to decompose exact 
 ### Cloud Claude context
 
 This handoff is self-contained for Claude running in the cloud. Read this repository's `AGENTS.md`, `HANDOFF.md`, `SYNTHETIC_DATASET_PLAN.md`, `JOURNEY.md`, and `RESEARCH.md`; do not assume access to this Mac's `~/.claude` memory or local private files. Local Claude memory is supplemental and is not part of the GitHub handoff.
+
+## 2026-10-28 — measure where dev points are lost (per-question trace)
+
+`eval.run_real --trace` records, for every question: the route (an exact reader `codes` / `rules` / `speech`, or the
+model), every reading the vote saw with the engine's answer and whether it reaches the key, and the final pick.
+`--trace_shadow` also answers each exactly-read question with the exact readers off, which shows how often the rules
+are confidently wrong where the model would be right. The hooks only observe: the dev score must equal FINAL.json's
+528/714 fair; if it does not, the trace is invalid. Run on dev only (never `--split test`). Shadow roughly doubles
+model time on exactly-read questions.
+
+```bash
+python -m eval.run_real --ckpt runs/v10-r8p-final/best.pt --split dev --adaptive 1.0 --hybrid \
+  --verifier runs/v10-r8p-final/verifier.json --cover --split_search --para 2 --k 16 \
+  --trace runs/v10-r8p-final/trace_dev.jsonl --trace_shadow --out runs/v10-r8p-final/real_dev_traced.json
+python -m eval.trace_report runs/v10-r8p-final/trace_dev.jsonl --out runs/v10-r8p-final/trace_dev_report.json
+```
+
+Each miss lands in one bucket: exact reader wrong (fix or cross-check the rules), no reading right (reading coverage:
+training data in that wording), right reading not picked (selection: verifier). A separate tag counts misses where the
+engine found no family link although the key names a relation (solver conventions). Example: in "Barkha and Chandresh
+are siblings. Manish has two children ... Hansa has only one son ...", the engine answers "not related" even from
+correct facts, and "granddaughter" once everyone named is assumed to be one family (`members 5`). Decide the next
+round of work from these counts, per category.
