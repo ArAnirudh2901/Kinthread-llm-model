@@ -145,6 +145,12 @@ if __name__ == '__main__':
     ap.add_argument('--correct', action='store_true', help='re-read and correct unsure readings (exam.answer_corrected; needs a reader trained on correction rows)')
     ap.add_argument('--trace', default=None, help='per-question trace (JSONL: route, every reading, engine results) for eval.trace_report')
     ap.add_argument('--trace_shadow', action='store_true', help='with --trace: also answer exactly-read questions with the exact readers off (the model alone)')
+    ap.add_argument('--max_new', type=int, default=96, help='reader output budget in tokens (long stories need up to ~150)')
+    ap.add_argument('--reserve', type=int, default=0, help='within this many tokens of the budget, finish the statement and write the question (0: off)')
+    ap.add_argument('--closure', action='store_true', help="'not related' with unnamed relatives: retry with everyone named in one family")
+    ap.add_argument('--core_repair', action='store_true', help='every reading contradicts: answer without each fact of a minimal conflicting set')
+    ap.add_argument('--lever', action='store_true', help='verifier probability times the reader weight (LEVER) instead of replacing it')
+    ap.add_argument('--trace_pow', type=float, default=0.0, help='vote weight times reading traceability ** this (0: off)')
     a = ap.parse_args()
     dev = get_device(force_cpu=a.cpu)
     model, vocab = load(a.ckpt, dev)
@@ -155,8 +161,9 @@ if __name__ == '__main__':
     rows = [r for r in load_real(a.pattern) if not a.split or split_of(r) == a.split][:a.limit]
     from kinlogic.codes import _fits
     chk = (lambda lf: _fits(lf) is not None) if a.check else None
-    more = (lambda b: [x + y for x, y in zip(generate(model, vocab, b, dev, k=2 * a.k, check=chk), generate(model, vocab, b, dev, k=2 * a.k, sample=True, temperature=1.0))]) if a.adaptive else None
-    read = lambda b: generate(model, vocab, b, dev, k=a.k, check=chk)
+    gen = lambda b, m=model, v=vocab, **kw: generate(m, v, b, dev, max_new=a.max_new, reserve=a.reserve, **kw)
+    more = (lambda b: [x + y for x, y in zip(gen(b, k=2 * a.k, check=chk), gen(b, k=2 * a.k, sample=True, temperature=1.0))]) if a.adaptive else None
+    read = lambda b: gen(b, k=a.k, check=chk)
     if a.ensemble:   # more readers vote through the same engine: each adds its k readings
         others = [load(c, dev) for c in a.ensemble.split(',')]
         one = read
@@ -178,9 +185,9 @@ if __name__ == '__main__':
     fn = (lambda text: answer_looped(text, model, vocab, dev, k=a.k)) if a.halt else None
     if a.verifier:
         os.environ['KIN_VERIFIER'] = a.verifier
-    if a.cover:
-        import kinlogic.exam as E
-        E.COVER = True
+    import kinlogic.exam as E
+    E.COVER = E.COVER or a.cover
+    E.CLOSURE, E.CORE_REPAIR, E.LEVER, E.TRACE_POW = a.closure, a.core_repair, a.lever, a.trace_pow
     if a.para:   # self-consistency over surface forms: the same question with other names and code symbols
         import random
         import zlib

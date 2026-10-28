@@ -17,7 +17,7 @@ import kinlogic.exam as exam
 import kinlogic.rules as rules
 import kinlogic.speech as speech
 
-KEEP = ('answer', 'option', 'status', 'facts')
+KEEP = ('answer', 'option', 'status', 'facts', 'via', 'trace')
 NONE_KEY = re.compile(r'none of|cannot be|can.?t be|inadequate|insufficient|no relation|not related|unrelated|stranger',
                       re.I)
 
@@ -108,7 +108,9 @@ class Tracer:
         main = [pa for pa in self._passes if pa['original']]
         first = main[0] if main else {'route': None, 'exact_reader': None, 'exact_rejected': None}
         vkey = meta.get('verified_key')
-        rec = {**meta, 'question': r['question'][:400], 'key': r.get('answer') or r.get('answer_text'),
+        rec = {**meta, 'question': r['question'][:400], 'text': as_text(r), 'options': r.get('options') or [],
+               'answer': r.get('answer'), 'answer_text': r.get('answer_text'), 'n_tokens': len(self._question or ()),
+               'key': r.get('answer') or r.get('answer_text'),
                'key_text': key_text(r), 'key_is_none': bool(NONE_KEY.search(key_text(r))), 'ok': bool(ok),
                'ok_verified': None if vkey is None else res.get('option') == vkey,
                'final': {**{k: res.get(k) for k in KEEP}, 'confidence': res.get('confidence')},

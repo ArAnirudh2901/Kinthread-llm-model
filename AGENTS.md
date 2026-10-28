@@ -96,3 +96,11 @@ any changed data from LLM-From-Scratch, regenerate `data/SHA256SUMS` if data cha
   `tests/test_trace.py` (6 pass without torch). Not yet run on the private dev set; see HANDOFF.md for the Kaggle
   command and how to read the buckets. Answers are unchanged by tracing. Written in this mirror (cloud session without
   the canonical LLM-From-Scratch checkout): copy `eval/trace*.py`, the `eval/run_real.py` change and the test there.
+- 2026-10-28 (answer-stage flags, balance, repeatability; cloud mirror, no torch): added off-by-default flags
+  `--closure --core_repair --lever --trace_pow --max_new --reserve` to `eval.run_real` with an offline replay
+  (`eval.rescore_trace`, McNemar vs base), `eval.balance_report`, `build_balanced.py`, detour questions
+  (`kinlogic.generate.obfuscation_set` / `q_obfuscated`, opt-in) and `eval.consistency` (rename, option shuffle,
+  reorder, detours; gold facts 100% agree, rule readers 96.7%). Fixed: "my. wife" stray period; rows with > 32 people
+  are dropped instead of encoded as `<unk>` (2.2% of mix_r8). 117 non-torch tests pass. Website decoder parity fixes
+  are in Kinthread (runtime a171d14ed9a4). Checkpoint unchanged; nothing deployed. See HANDOFF.md (2026-10-28 decoder
+  parity section) for commands and what still needs a Kaggle run.
