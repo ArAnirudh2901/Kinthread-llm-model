@@ -103,4 +103,5 @@ any changed data from LLM-From-Scratch, regenerate `data/SHA256SUMS` if data cha
   reorder, detours; gold facts 100% agree, rule readers 96.7%). Fixed: "my. wife" stray period; rows with > 32 people
   are dropped instead of encoded as `<unk>` (2.2% of mix_r8). 117 non-torch tests pass. Website decoder parity fixes
   are in Kinthread (runtime a171d14ed9a4). Checkpoint unchanged; nothing deployed. See HANDOFF.md (2026-10-28 decoder
-  parity section) for commands and what still needs a Kaggle run.
+  parity section) for commands and what still needs a Kaggle run. Locked test v2 (`eval/locked.py`, `--split locked2`):
+  held-out new sites, hashes only, scored once with a ledger; not frozen yet (needs new scraped sites).

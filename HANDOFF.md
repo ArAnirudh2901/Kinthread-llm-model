@@ -191,3 +191,15 @@ python -m eval.consistency --groups 300 --ckpt runs/v10-r8p-final/best.pt --k 16
 
 Copy to LLM-From-Scratch: `build_balanced.py`, `eval/{balance_report,consistency,rescore_trace,trace}.py`,
 `eval/run_real.py`, `kinlogic/{exam,facts,generate,prepare}.py`, `reader.py`, `tests/test_{answer_options,balance_consistency}.py`.
+
+**Locked test v2 (`eval/locked.py`).** v1 halves one pool by hash, so site templates sit in dev and test alike. v2 is
+frozen from new questions only (scrape new sites with `eval.sites` into `data/fresh_online/`), from sites with no
+question in the v1 dev half, minus any question within `eval.leak.NEAR` (people-masked 3-gram Jaccard) of a dev
+question. The manifest holds hashes only; dev and v1 runs exclude these questions; `--split locked2` refuses a partial
+run and a second score without `--rescore_reason`, and appends checkpoint SHA-256, arguments and scores to
+`data/locked_v2_ledger.jsonl`.
+
+```bash
+python -m eval.locked --freeze --pattern 'data/fresh_online/*.jsonl'     # once, before any v11 work looks at them
+python -m eval.run_real --ckpt <selected>.pt --pattern 'data/fresh_online/*.jsonl' --split locked2 <FINAL.json settings>
+```
