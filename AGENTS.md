@@ -105,3 +105,7 @@ any changed data from LLM-From-Scratch, regenerate `data/SHA256SUMS` if data cha
   are in Kinthread (runtime a171d14ed9a4). Checkpoint unchanged; nothing deployed. See HANDOFF.md (2026-10-28 decoder
   parity section) for commands and what still needs a Kaggle run. Locked test v2 (`eval/locked.py`, `--split locked2`):
   held-out new sites, hashes only, scored once with a ledger; not frozen yet (needs new scraped sites).
+- 2026-10-28 (gauntlet and r9p plan): `eval/gauntlet.py` (1,140 generated hard questions in 19 categories, twins,
+  plus 28 hand-written twisted ones in `eval/twisted_set.py`; gold 100%, rules alone 45.7%). Browser production
+  pipeline on 667 of them: 92.1% (claims 63%, puzzles 70%, two detours 77%, sufficiency 77%). Deep lineages up to ten
+  generations (`q_generations`). `colab/r9p_kaggle.ipynb` and `TRAINING_V11_CODEX.md` hold the next training run.

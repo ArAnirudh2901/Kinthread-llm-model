@@ -203,3 +203,29 @@ run and a second score without `--rescore_reason`, and appends checkpoint SHA-25
 python -m eval.locked --freeze --pattern 'data/fresh_online/*.jsonl'     # once, before any v11 work looks at them
 python -m eval.run_real --ckpt <selected>.pt --pattern 'data/fresh_online/*.jsonl' --split locked2 <FINAL.json settings>
 ```
+
+## 2026-10-28 — gauntlet, deep lineages, twisted set, r9p notebook
+
+**Gauntlet (`eval/gauntlet.py`, `data/gauntlet_v1.jsonl.gz`, evaluation only, leak-guarded).** 1,140 generated questions
+in 19 categories (60 each: lines of descent of 3-5 and 6-10 generations, cousins up to the fifth degree, 1/2/3
+detours, direct and indirect speech, introductions, identities, nested, shuffled statements, deep chains, coded,
+puzzles, sufficiency, claims, 80-240 word stories, two-family stories), each with a renamed or option-shuffled twin,
+plus 28 hand-written twisted questions (`eval/twisted_set.py`, all verified by `python -m eval.twisted_set`). Expected
+answers come from the gold facts through the answer pipeline; gold scores 100%, rule readers alone 45.7%.
+
+Production pipeline (Kinthread browser runtime with the fixed decoder, Node + Pyodide, beam 8, run on 667 questions:
+30 per category, all generations rows and all twisted ones): **614/667 = 92.1%**. Weak: claims 63%, puzzles 70%, two
+detours 77%, sufficiency 77%, three detours 83%, twisted 24/28 (missed: two families joined only by "friends" read as
+cousins, one sufficiency, one claims, one deep in-law chain). Strong: 3-10 generations 97-98% (rules read only ~22% of
+these: the model does), deep cousins 100%. Speech, coded and story rows are 100% read by the exact rules (the
+generators write rule-parseable text), so those cells say little about the model. Twins: same answer 100% except deep
+chains (92%) and sufficiency (93%). Generated questions are not real exams (real locked: 68.8%); use the gauntlet for
+where the reader breaks, the real dev split for decisions.
+
+**Deep lineages.** `kinlogic.generate.Lineage` / `q_generations` (opt-in kind): two lines of descent from one couple,
+up to ten generations each, statements often shuffled, spouses as distractors. Fixed on the way: `World.father/mother/
+spouse` return -1 for none, and the new detour/lineage code had tested `is not None`, which let -1 index the last
+person (`test_generated_questions_are_true` caught it).
+
+**Next run.** `colab/r9p_kaggle.ipynb` (r8p warm start checked by SHA-256, `balanced_mix_v1` added, block 512) and
+`TRAINING_V11_CODEX.md` (the full train / select / locked procedure and the hypothesis order toward 85-90%).

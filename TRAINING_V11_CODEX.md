@@ -14,6 +14,9 @@ change is adopted only if the real dev split says so.
 - Measured weak spots (this repo, 2026-10-28): two detours ("mother's husband's only son") flip 27% of answers
   (accuracy 80% vs 93%); 63% of long-story gold readings exceed the 96-token output cap; 2.2% of mix_r8 rows had more
   than 32 people (now dropped); formats are unbalanced in mix_r8 (data sufficiency 1.5%, nested 2.3%, possessive 2.4%).
+- Gauntlet (`eval/gauntlet.py`, browser pipeline, 667 questions): 92.1% overall; claims 63%, family puzzles 70%,
+  two detours 77%, data sufficiency 77%, three detours 83%; twisted hand-written 24/28. These are the cells r9p
+  data must lift (the balanced supplement gives family puzzles and data sufficiency 2,500 rows each).
 
 ## Hard rules (from the owner)
 
