@@ -727,17 +727,17 @@ def _exact(word, side, only) -> bool:
 
 def _via(w, prev, move, node, rng):
     """The relative a one-hop move can go through instead: father = mother's husband, husband = son's father,
-    son = wife's son, brother = father's (only) son. None when the family has no such relative."""
+    son = wife's son, brother = father's (only) son. None when the family has no such relative (World gives -1)."""
     if move == 'U':
         other = w.mother(prev) if w.father(prev) == node else w.father(prev)
-        return other if other is not None and w.spouse(other) == node else None
+        return other if other >= 0 and w.spouse(other) == node else None
     if move == 'S':
         kids = [c for c in w.children(prev) if c in w.children(node)]
         return rng.choice(kids) if kids else None
     if move == 'D':
         sp = w.spouse(prev)
-        return sp if sp is not None and node in w.children(sp) else None
-    parents = [x for x in (w.father(prev), w.mother(prev)) if x is not None and node in w.children(x)]
+        return sp if sp >= 0 and node in w.children(sp) else None
+    parents = [x for x in (w.father(prev), w.mother(prev)) if x >= 0 and node in w.children(x)]
     return rng.choice(parents) if parents else None
 
 
@@ -854,7 +854,7 @@ def q_generations(rng, up: int | None = None, down: int | None = None) -> dict |
     on_path = {a, b, *(n for _, n in fam.hops(a, b))}
     for node in list(on_path):   # "Ravi's wife is Sita": true but not needed
         sp = fam.w.spouse(node)
-        if sp is not None and sp not in on_path and rng.random() < 0.2:
+        if sp >= 0 and sp not in on_path and rng.random() < 0.2:   # World gives -1 for no spouse
             rx, ry = q.ref(node), q.ref(sp)
             word = 'husband' if fam.g(sp) == 'M' else 'wife'
             stmts.append((state(rng, rx.surface, ry.surface, word), [F(rx, word, ry)]))

@@ -98,7 +98,7 @@ cousins (`q_generations`), long and two-family stories, and every format at the 
 ## 4. Train r9p (warm start from r8p, same architecture)
 
 Same recipe as r8p (`colab/r8p_kaggle.ipynb`), with the new data and a longer block so long stories fit with a
-192-token reading. Copy the r8p notebook to `colab/r9p_kaggle.ipynb` and change only:
+192-token reading. `colab/r9p_kaggle.ipynb` is ready (Save & Run All; it checks the r8p SHA-256). It differs from r8p only in:
 
 ```python
 EXTRA = [f'{DATA}/reworded.jsonl.gz*2', 'data/mix_r8.jsonl.gz', f'{S}/star_r3.jsonl.gz*2', 'data/balanced_mix_v1.jsonl.gz*2']
