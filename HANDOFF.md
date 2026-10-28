@@ -229,3 +229,9 @@ person (`test_generated_questions_are_true` caught it).
 
 **Next run.** `colab/r9p_kaggle.ipynb` (r8p warm start checked by SHA-256, `balanced_mix_v1` added, block 512) and
 `TRAINING_V11_CODEX.md` (the full train / select / locked procedure and the hypothesis order toward 85-90%).
+
+**Training supplements (candidates, not trained on yet).** `data/balanced_mix_v1.jsonl.gz` (22,500 rows; manifest next to
+it): 9 formats x 2,500; questions 79% ask, 7% none (claims, sufficiency), 5.6% who, 3.4% gender, 3.3% pair, 1.3% count
+(mix_r8: 81.7% ask); 1,137 distinct answers, none above 4.6%; people <= 32; fact tokens <= 190 (2.3% above 128).
+`data/detour_v1.jsonl.gz` (4,000 rows, `build_detours.py`): 1/2/3 detours equally, top answer 4.7%. Both are exact
+generator facts, engine-checked; the leak guard keeps the gauntlet out at training time.

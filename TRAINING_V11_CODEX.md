@@ -90,7 +90,8 @@ Keep everything r8p trained on and add the balanced supplement (exact generator 
 | `data/reworded.jsonl.gz` | as before | `*2`, as r8p |
 | `data/mix_r8.jsonl.gz` | as before | as r8p (rows with > 32 people are now dropped by `reader.encode_example`) |
 | `star_r3.jsonl.gz` (r8p notebook output) | as before | `*2`, as r8p |
-| `data/balanced_mix_v1.jsonl.gz` | 22,500 (9 formats x 2,500) | new: `*2` (see the manifest) |
+| `data/balanced_mix_v1.jsonl.gz` | 22,500 (9 formats x 2,500; questions 79% ask, 21% who/gender/pair/count/claims) | new: `*2` (see the manifest) |
+| `data/detour_v1.jsonl.gz` | 4,000 (1, 2, 3 detours: 1,334 / 1,333 / 1,333) | new: `*1` (`build_detours.py`) |
 | `data/gemini_synthetic_v1.jsonl.gz` | 1,015 | optional, variant B only |
 
 `balanced_mix_v1` includes LogiQAte-style detours (`q_obfuscated`), lines of descent up to ten generations and deep
@@ -104,7 +105,8 @@ Same recipe as r8p (`colab/r8p_kaggle.ipynb`), with the new data and a longer bl
 192-token reading. `colab/r9p_kaggle.ipynb` is ready (Save & Run All; it checks the r8p SHA-256). It differs from r8p only in:
 
 ```python
-EXTRA = [f'{DATA}/reworded.jsonl.gz*2', 'data/mix_r8.jsonl.gz', f'{S}/star_r3.jsonl.gz*2', 'data/balanced_mix_v1.jsonl.gz*2']
+EXTRA = [f'{DATA}/reworded.jsonl.gz*2', 'data/mix_r8.jsonl.gz', f'{S}/star_r3.jsonl.gz*2', 'data/balanced_mix_v1.jsonl.gz*2',
+         'data/detour_v1.jsonl.gz']
 ```
 
 ```bash
