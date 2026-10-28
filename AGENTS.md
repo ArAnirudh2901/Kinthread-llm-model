@@ -105,3 +105,11 @@ any changed data from LLM-From-Scratch, regenerate `data/SHA256SUMS` if data cha
   are in Kinthread (runtime a171d14ed9a4). Checkpoint unchanged; nothing deployed. See HANDOFF.md (2026-10-28 decoder
   parity section) for commands and what still needs a Kaggle run. Locked test v2 (`eval/locked.py`, `--split locked2`):
   held-out new sites, hashes only, scored once with a ledger; not frozen yet (needs new scraped sites).
+- 2026-10-28 (website v10 input path; cloud mirror, no torch): added `eval/web_input_set.py` (60 generated questions
+  with known answers, fixed seed; re-runs itself with PYTHONHASHSEED=0 because the generator iterates sets) for
+  Kinthread's `tools/input-compare`. On it plus the 6 page examples, through the website's Node/Pyodide pipeline with
+  v10-r8p: the old website input (v8 `forModel` rewording, question and options removed) 57/66 = 86.4% at beam 16,
+  58/66 at beam 8, 52/66 at beam 4; the pasted text as written (the `eval.run_real` input) 63/66 = 95.5% at beams 16
+  and 8, 60/66 at beam 4 (exam score with option letters 64/66 at 16); mean latency 3.7 s -> 1.4 s at beam 16. The
+  website now sends the text as written (details in Kinthread AGENTS.md, same date). Generated set only: dev 73.9% /
+  locked 68.8% unchanged. Copy `eval/web_input_set.py` to LLM-From-Scratch. Checkpoint unchanged; nothing deployed.
