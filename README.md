@@ -8,13 +8,13 @@ selected 39.5M-parameter v10 reader, and a 5.1M-parameter name finder. Small C e
 the browser models. The trained checkpoints, training data and exported browser model are included, so you can ask
 questions, evaluate, retrain or export straight after cloning.
 
-The website's production deployment still uses the v8 browser model. The v10-r8p candidate now passes a local
-Chrome three-link answer smoke check on runtime `f608eed15e9b`: it returned the expected paternal-cousin relation
-as `assumed`/tentative with an uncalibrated score of 0.95 in 9.6 seconds using two WebAssembly threads. A
-Node/Pyodide end-to-end regression also passes. These checks do not establish broad browser parity or calibrated
-accuracy. The locked test remains 68.8% fair / 72.2% verified, below the 85% target. Broader parity, accuracy,
-calibration, and device performance remain release gates. See the website's
-[migration plan](../../Web_Dev/kinthread/MODEL_UPGRADE_PLAN.md) before attempting a site release.
+The production website serves the selected v10-r8p browser model (39.5M exact fp32 parameters; checkpoint SHA-256
+`38c289d351d6517b5cde1bc9fb64ea97bd33eee193639d6351edda52fdfd7a52`). Live release hashes were checked for all
+66 model assets and 20 runtime files. The official locked real-exam score is 68.8% fair / 72.2% verified, below
+the 85% target. The 99.57% generated-question score is not a real-world accuracy estimate; that benchmark had
+already been reported for an earlier model version. Browser calibration, broad accuracy, and low-power device
+performance remain open. See the website's [migration plan](../../Web_Dev/kinthread/MODEL_UPGRADE_PLAN.md) for
+release details.
 
 ## Contents
 
@@ -48,7 +48,7 @@ web/                 browser engine: engine.c (WebAssembly, six builds), kinship
 4. **Knowing when to stop.** If A and B are never mentioned together, or through people who are, the answer is
    "unknown" without running the model; low agreement between paths gives a tentative answer.
 
-## Results
+## Legacy v8 reference results
 
 | Measure | Score |
 | --- | --- |
@@ -93,12 +93,13 @@ cd web && ./build.sh          # needs Emscripten (emcc): relaxed SIMD / SIMD / s
 node test/test_node.mjs       # the engine must match the Python reference on test/golden.json
 ```
 
-The v8 export is lossless: original 32-bit weights, not quantized. The v10 reader prototype is separate
-(`reader_engine.c`, `reader.js`) and has additional SIMD/scalar single-thread and pthread builds. The 50-prompt
+The v8 export is lossless: original 32-bit weights, not quantized. The v10 reader (`reader_engine.c`, `reader.js`)
+also preserves exact fp32 weights and has SIMD/scalar single-thread and pthread builds. Fifty generated-prompt
 wrapper fixtures match PyTorch through prefix prefill, KV-cache growth, and one cached decode (max log-prob delta
-`2.27e-4`, probability delta `7.82e-5`). The website candidate adds the grammar/beam/Pyodide answer path and now
-passes one local three-link end-to-end smoke check, but does not yet meet its full browser parity or accuracy gates.
-Production still ships v8; see the website migration plan before changing that release.
+`2.27e-4`, probability delta `7.82e-5`). The production site now serves v10-r8p with the grammar/beam/Pyodide
+answer path. These checks and a local Chrome smoke check do not establish broad browser parity, calibrated accuracy,
+or low-power-device performance; the official locked real-exam score remains below the 85% target. See the website
+migration plan for the release and its remaining validation work.
 
 ## Integrity
 
@@ -112,6 +113,28 @@ the weights every time it loads them.
 The kinship questions come from **CLUTRR** (Sinha et al., *CLUTRR: A Diagnostic Benchmark for Inductive Reasoning
 from Text*, EMNLP 2019, Facebook AI Research), distributed under CC BY-NC 4.0: free to use with attribution, not
 for commercial use.
+
+### Balanced speech and long-story supplement
+
+`data/balanced_question_formats_v1.jsonl.gz` is a separately audited training candidate with equal direct-speech,
+indirect-speech, and long-story counts. It balances 25 canonical answer types at 50 rows per type in each format
+(3,750 rows total); long stories follow configured 80–240-word bands (the checked run ranges from 81–187
+words). Every row is parsed by the project's exact reader and solved before acceptance. The manifest records counts and SHA-256. Generate it with
+`python3 generate_balanced_question_types.py`; see [SYNTHETIC_DATASET_PLAN.md](SYNTHETIC_DATASET_PLAN.md) for the
+quotas, validation, and optional language-model rewriting contract.
+
+This supplement does not alter the selected checkpoint or claim real-exam accuracy. Review its manifest and use a
+development evaluation before including it in a training run.
+
+### Gemini rewrite candidate
+
+The separate `data/gemini_synthetic_v1.jsonl.gz` pool contains 1,015 accepted rewrites from 2,069 source attempts
+(49.1% acceptance); its 204-row focus subset, audit log, and resumable state are also included. The generator spaces
+tracked Gemini requests by at least 8 seconds and verifies rewritten facts and answers with the project readers and
+solver. This pool is not balanced by answer type or question format, and it includes rare/extreme relation labels;
+keep it separate from the 3,750-row balanced supplement until its label distribution and training-pool overlap are
+audited. Neither candidate has been used to train or modify v10-r8p. See [SYNTHETIC_DATASET_PLAN.md](SYNTHETIC_DATASET_PLAN.md)
+for the full handoff and current long-story diagnostic.
 
 ## Related
 
