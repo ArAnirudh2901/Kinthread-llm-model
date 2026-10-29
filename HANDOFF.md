@@ -235,3 +235,10 @@ it): 9 formats x 2,500; questions 79% ask, 7% none (claims, sufficiency), 5.6% w
 (mix_r8: 81.7% ask); 1,137 distinct answers, none above 4.6%; people <= 32; fact tokens <= 190 (2.3% above 128).
 `data/detour_v1.jsonl.gz` (4,000 rows, `build_detours.py`): 1/2/3 detours equally, top answer 4.7%. Both are exact
 generator facts, engine-checked; the leak guard keeps the gauntlet out at training time.
+
+**Exam-pattern mining (`eval/mine_patterns.py`).** Counts what real dev questions look like (openings, question forms,
+constructions, kin words, coded expression size, length, people, options, answers, masked skeletons shared by 3+
+questions) next to generator or training-file output, with per-feature model accuracy from a dev trace. Writes counts
+only, never question text; reads dev only and skips locked2. Needs the private real questions, so it runs on Kaggle or
+the owner's Mac (TRAINING_V11_CODEX.md step 1b). Stand-in run on the 152 authored questions: generated questions are
+far less often 4-option MCQ (16% vs 95%) and "How is X related to Y?" (25% vs 84%).

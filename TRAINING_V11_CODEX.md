@@ -72,6 +72,24 @@ python -m eval.evaluate --ckpt runs/v10-r8p-final/best.pt --sets unseen   # as i
 
 Write all numbers into HANDOFF.md before training.
 
+### 1b. Mine real exam patterns (dev only; counts, never text)
+
+```bash
+python -m eval.mine_patterns --trace runs/v10-r8p-final/trace_dev.jsonl --out runs/patterns_dev.json
+python -m eval.mine_patterns --gen_files data/mix_r8.jsonl.gz data/balanced_mix_v1.jsonl.gz --gen_n 0 --out runs/patterns_vs_training.json
+```
+
+The report compares real dev questions with generated (or training) questions feature by feature: openings
+(pointing, introducing, coded, "family of N", directions sets), question forms, constructions ("only", of-chains,
+pronouns, Hindi words, professions), kin words, coded expression size, length, people, options and answers, plus
+masked question skeletons shared by at least 3 dev questions. `gaps` lists what real questions use at least twice as
+often as the generator; `misses` lists the features of the dev questions the model got wrong. Commit both JSON files
+(they hold no question text), then extend `kinlogic/generate.py` for the largest gaps and misses, weighted by real
+share, before building the r9p data. On the 152 hand-written exam-style questions (a stand-in run here) the largest
+gaps were 4-option multiple choice (95% vs 16% generated), "How is X related to Y?" (84% vs 25%), "only" (36% vs
+10%), of-chains (13% vs 3%), paternal/maternal (9% vs 2%), Hindi kin words (5% vs 0.1%) and 3-operator coded
+expressions (4% vs 1%); the real dev numbers decide.
+
 ## 2. Freeze the new locked test before any new work looks at new questions
 
 ```bash
