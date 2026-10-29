@@ -8,9 +8,9 @@ from kinlogic.prepare import prepare  # noqa: E402
 
 PUZZLE = ('Barkha and Chandresh are siblings. Manish has two children and he is son of Suresh, who is father-in-law of '
           'Hansa. Hansa has only one son. Chandresh is not son-in-law of Suresh. How Barkha is related to Suresh?')
-FACTS = '@0 sibling @1 ; @2 has 2 child ; @3 son @2 ; @4 father-in-law @3 ; @4 has 1 son ; @3 not son-in-law @1 ; @2 male'
+FACTS = '@0 sibling @1 ; @2 has 2 child ; @3 son @2 ; @4 father-in-law @3 ; @4 has 1 son ; @3 not son-in-law @1 ; @2 male ; @0 female'   # stated, so no test depends on the name-gender table
 READ = FACTS + ' ; ask @3 @0'
-CYCLE = '@0 sibling @1 ; @2 has 2 child ; @3 son @2 ; @3 father @2 ; @4 father-in-law @3 ; @4 has 1 son ; @2 male ; ask @3 @0'
+CYCLE = '@0 sibling @1 ; @2 has 2 child ; @3 son @2 ; @3 father @2 ; @4 father-in-law @3 ; @4 has 1 son ; @2 male ; @0 female ; ask @3 @0'
 
 
 def reader(*readings):

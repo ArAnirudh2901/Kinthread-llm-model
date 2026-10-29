@@ -254,3 +254,10 @@ question text, kept on Kaggle and in `~/kaggle_r9p`). Decisions are computed, no
 gives the adopted answer flags, `eval/compare_runs.py` the dev adoption rule (>= 2 points, more wins than losses,
 McNemar p < 0.05), and step D adds the gauntlet and consistency checks into `decision.json`. Step E (locked test) runs
 only after the owner writes "approve locked". The old `colab/r9p_kaggle.ipynb` is replaced by `colab/r9p/C_train`.
+
+## 2026-10-29 — one branch per repo
+
+All work is on `main` in Kinthread-llm-model, Kinthread and LLM-From-Scratch. `v9-reader`, the claude/* branches and
+`kinship-qa-web` were merged (each fully contained in `main`) and are deleted on GitHub. LLM-From-Scratch
+`2_Training_Tiny_LLM` was synced from this repo (60 files, none diverged). Notebooks and the r9p run-book clone `main`.
+The answer-option tests now state the gender they need, so they pass without the name table.
