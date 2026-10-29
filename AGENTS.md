@@ -108,6 +108,9 @@ any changed data from LLM-From-Scratch, regenerate `data/SHA256SUMS` if data cha
 - 2026-10-28 (gauntlet and r9p plan): `eval/gauntlet.py` (1,140 generated hard questions in 19 categories, twins,
   plus 28 hand-written twisted ones in `eval/twisted_set.py`; gold 100%, rules alone 45.7%). Browser production
   pipeline on 667 of them: 92.1% (claims 63%, puzzles 70%, two detours 77%, sufficiency 77%). Deep lineages up to ten
-  generations (`q_generations`). `colab/r9p_kaggle.ipynb` and `TRAINING_V11_CODEX.md` hold the next training run.
+  generations (`q_generations`). `colab/r9p/` (six notebooks) and `TRAINING_V11_CODEX.md` hold the next training run.
 - 2026-10-29: `eval/mine_patterns.py` mines real dev question patterns (counts and masked skeletons only) against
   generator or training output, with per-feature dev accuracy from a trace; run it before building r9p data (step 1b).
+- 2026-10-29 (r9p run-book): `TRAINING_V11_CODEX.md` rewritten for Codex as a fixed run-book; six Kaggle notebooks in
+  `colab/r9p/` (A baseline, B1/B2 suites, C train, D select, E locked), runner `colab/r9p/run_step.sh`, computed
+  decisions (`eval/compare_runs.py`, `eval.rescore_trace --out`). Locked test only after the owner writes "approve locked".

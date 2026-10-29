@@ -1,189 +1,257 @@
-# Next reader (v10-r9p) — training instructions for Codex
+# r9p training run-book (for Codex)
 
-Hand this file to Codex as the task. It is self-contained: what to run, in what order, what to compare, and when to
-stop. Read `AGENTS.md` (rules) and `HANDOFF.md` (latest section) first. Do not skip the measurement steps: every
-change is adopted only if the real dev split says so.
+This file is the complete task. Everything is already written: six Kaggle notebooks, a runner script and the
+decision rules. Your job is to run them in order, check each result, and write the report. Do not design, tune or
+improve anything.
 
-## Goal and honest status
+---
 
-- Current model: v10-r8p step 6,000 (`runs/v10-r8p-final/best.pt`, SHA-256
-  `38c289d351d6517b5cde1bc9fb64ea97bd33eee193639d6351edda52fdfd7a52`), 39.5M exact fp32 parameters.
-- Real exam accuracy with the FINAL setting: dev 73.9% fair / 77.2% verified; locked test 68.8% fair / 72.2%
-  verified. Target: 80% now, 85-90% after. Generated sets are already 95-99.6%, so the gap is real-exam wording,
-  long inputs and twisted descriptions, not composition (the exact engine composes).
-- Measured weak spots (this repo, 2026-10-28): two detours ("mother's husband's only son") flip 27% of answers
-  (accuracy 80% vs 93%); 63% of long-story gold readings exceed the 96-token output cap; 2.2% of mix_r8 rows had more
-  than 32 people (now dropped); formats are unbalanced in mix_r8 (data sufficiency 1.5%, nested 2.3%, possessive 2.4%).
-- Gauntlet (`eval/gauntlet.py`, browser pipeline, 667 questions): 92.1% overall; claims 63%, family puzzles 70%,
-  two detours 77%, data sufficiency 77%, three detours 83%; twisted hand-written 24/28. These are the cells r9p
-  data must lift (the balanced supplement gives family puzzles and data sufficiency 2,500 rows each).
+## 1. Prompt to paste into Codex
 
-## Hard rules (from the owner)
+Copy everything inside the box into Codex as the task.
 
-- Never quantize, distil or shrink: keep exact fp32 weights. A larger model is allowed.
-- Real questions (`data/real_questions`, Kaggle dataset `kinthread-real-questions`) are evaluation only, never
-  training text. Tune and select on the dev split only. Score the locked test once, for the final pick only.
-- Gemini keys are never printed or committed.
-- Commits: author `Anirudh Aravalli <anirudh30012005@gmail.com>`; never add Co-Authored-By or session trailers;
-  commit or push only when the owner asks. Python with torch on the Mac: `~/Generative_AI/LLM_from_Scratch/.venv/bin/python`.
-- Code changes go to LLM-From-Scratch (`2_Training_Tiny_LLM`) and are mirrored here (see AGENTS.md "Updating this repo").
-  This branch was written in the mirror: first copy the files listed at the end of HANDOFF.md into the canonical repo.
+```text
+You are running a fixed, already-written machine-learning pipeline. Do not design or change anything.
 
-## 0. Setup (Kaggle, GPU T4 x2 or P100)
+Repository: https://github.com/ArAnirudh2901/Kinthread-llm-model
+Branch: claude/nice-hamilton-3ttcwr (work and push only on this branch)
+Instructions: the file TRAINING_V11_CODEX.md in that branch. Follow sections 3 to 8 exactly.
 
-```bash
-git clone -b claude/nice-hamilton-3ttcwr https://github.com/ArAnirudh2901/Kinthread-llm-model.git && cd Kinthread-llm-model
-python verify_model.py                       # checkpoints and exported files match model_manifest.json
-cd data && sha256sum -c SHA256SUMS && cd ..  # data files match
-python -m pytest -q tests                    # all tests must pass with torch installed
+How to work:
+1. Do the setup in section 4 once.
+2. Run the steps in this order and one at a time: A, B1, C, B2, D. Run E only if the owner writes "approve locked".
+3. Each step is one command: colab/r9p/run_step.sh <STEP>. Wait for it to finish (it can take hours).
+4. After each step, do the check listed for that step in section 5. Copy the numbers into the report (section 7).
+5. Commit only the folder results/r9p/<STEP>/ and the report, with the commit message given in section 5.
+6. If any output contains "STOP:" or a check fails: stop the whole run. Do not retry with changes.
+   Report the step, the exact STOP line, and what you checked (section 6 says what each message means).
+
+Never:
+- edit any file except results/r9p/**, HANDOFF.md and AGENTS.md (two exceptions, both with the exact commands
+  given: section 4 step 4, and the ALLOW_LOCKED line in step E);
+- change numbers, flags or commands in the notebooks or the runner;
+- commit anything from ~/kaggle_r9p, any .log file, any file named private/*, or the Kaggle token;
+- run step E without the words "approve locked" from the owner;
+- add "Co-Authored-By" or any AI attribution lines to commits.
+
+When finished (or stopped), reply with the filled report from section 7 and nothing else.
 ```
 
-Attach the private dataset `kinthread-real-questions` and link it as `data/real_questions/`. Put the r8p checkpoint
-at `runs/v10-r8p-final/best.pt` and `verifier.json`, `FINAL.json` next to it (Kaggle run `362159765` output).
+---
 
-## 1. Baseline and free gains (no training)
+## 2. What this run does, in one paragraph
 
-Run once on dev with tracing; the score must equal FINAL.json (528/714 fair) or the setup is wrong.
+The current model, v10-r8p, scores 73.9% on real dev exam questions and 68.8% on the locked real test. This run
+measures r8p in detail (step A, B1), trains the next model r9p from r8p with new balanced training data (step C),
+measures r9p the same way (step B2), and decides with fixed rules whether r9p is better (step D). Only if it is, and
+only with the owner's approval, r9p is scored once on the locked test (step E). Nothing is deployed.
+
+## 3. Rules that are never broken
+
+1. Real exam questions are for evaluation only. They are never training data and never committed to git.
+2. The locked test (step E) is scored at most once, and only after the owner writes "approve locked".
+3. Never quantize, distil or shrink the model. Never change the architecture, tokenizer or vocabulary.
+4. Commits are authored as `Anirudh Aravalli <anirudh30012005@gmail.com>`, with no AI attribution lines.
+5. Push only to `claude/nice-hamilton-3ttcwr`. Do not open pull requests. Do not deploy anything.
+6. Do not print, log or commit the Kaggle token (`~/.kaggle/kaggle.json`).
+
+## 4. One-time setup
+
+Run these in the repository root, in order.
+
+1. Get the branch:
+   ```bash
+   git clone -b claude/nice-hamilton-3ttcwr https://github.com/ArAnirudh2901/Kinthread-llm-model.git
+   cd Kinthread-llm-model
+   git config user.name "Anirudh Aravalli"
+   git config user.email "anirudh30012005@gmail.com"
+   ```
+2. Install the Kaggle tool. The owner gives you the token file; put it at `~/.kaggle/kaggle.json`:
+   ```bash
+   pip install kaggle
+   chmod 600 ~/.kaggle/kaggle.json
+   kaggle kernels list --mine --page-size 5
+   ```
+   The last command must list the owner's notebooks (account `anirudharavalli`). If it fails, STOP: the token is
+   missing or wrong.
+3. Check that the private real-questions dataset exists:
+   ```bash
+   kaggle datasets list --mine | grep -i real
+   ```
+   Expected: a dataset named `anirudharavalli/kinthread-real-questions`.
+4. Only if step 3 shows a different name: open `colab/r9p/build_notebooks.py`, change the one line
+   `REAL = f'{USER}/kinthread-real-questions'` to the name shown, then run `python3 colab/r9p/build_notebooks.py`.
+   This is the only code edit you may make. If no real-questions dataset exists at all, STOP and ask the owner.
+5. Check the data files:
+   ```bash
+   cd data && sha256sum -c SHA256SUMS --quiet && cd ..
+   ```
+   Expected: no output. Any line means a corrupted file: STOP.
+
+## 5. The steps
+
+Each step runs on Kaggle with a GPU. Kaggle allows about 30 GPU hours per week and 12 hours per run. The runner pushes
+the notebook, checks Kaggle every 10 minutes, downloads the outputs to `~/kaggle_r9p/<STEP>` (outside the repo) and
+copies only the public results to `results/r9p/<STEP>/`. It prints `step <STEP> passed` at the end, or a `STOP:` line.
+
+| Order | Step | What it does | Time | Needs |
+| --- | --- | --- | --- | --- |
+| 1 | A | r8p on real dev with tracing; replays answer flags; mines exam patterns | 2-4 h | nothing |
+| 2 | B1 | r8p on the gauntlet, consistency and unseen sets; dev run with a 192-token reading | 3-5 h | nothing |
+| 3 | C | trains r9p from r8p (15,000 steps) | 3-6 h | nothing |
+| 4 | B2 | r9p on the gauntlet, consistency and unseen sets | 2-4 h | C passed |
+| 5 | D | trains r9p's verifier; compares r9p with r8p on dev; writes `decision.json` | 3-5 h | A, B1, C, B2 passed |
+| 6 | E | locked test, once (owner approval only) | 1-2 h | D says adopt |
+
+### Step A
 
 ```bash
-FINAL="--adaptive 1.0 --hybrid --verifier runs/v10-r8p-final/verifier.json --cover --split_search --para 2 --k 16"
-python -m eval.run_real --ckpt runs/v10-r8p-final/best.pt --split dev $FINAL \
-  --trace runs/v10-r8p-final/trace_dev.jsonl --trace_shadow --out runs/v10-r8p-final/real_dev_traced.json
-python -m eval.trace_report runs/v10-r8p-final/trace_dev.jsonl --out runs/v10-r8p-final/trace_dev_report.json
-python -m eval.rescore_trace runs/v10-r8p-final/trace_dev.jsonl --verifier runs/v10-r8p-final/verifier.json --cover --all
+colab/r9p/run_step.sh A
 ```
 
-`rescore_trace` replays the vote under `--closure`, `--core_repair`, `--lever`, `--trace_pow 1` and their
-combinations, with McNemar against base. Keep a flag only if it wins on dev with p < 0.05. Then measure the output
-budget, which needs re-reading:
+Check: open `results/r9p/A/A_summary.json`.
+- `r8p_dev` must contain `"dev fair"`. The first number must be between 522 and 534 (FINAL.json says 528/714). The
+  notebook already stops if it is not; just copy the value.
+- Copy `flags_adopted` (it may be empty: that is a valid result).
+- Copy the first 5 lines of `top_gaps` and of `top_misses`.
+
+Commit:
+```bash
+git add results/r9p/A && git commit -m "r9p step A: r8p dev baseline, flag replay, exam patterns" && git push origin claude/nice-hamilton-3ttcwr
+```
+
+### Step B1
 
 ```bash
-python -m eval.run_real --ckpt runs/v10-r8p-final/best.pt --split dev $FINAL --max_new 192 --reserve 8 \
-  --out runs/v10-r8p-final/real_dev_budget192.json
+colab/r9p/run_step.sh B1
 ```
 
-Record the r8p numbers on the hard and repeatability suites (they are the bar r9p must clear):
+Check: open `results/r9p/B1/B_r8p_summary.json` and `results/r9p/B1/r8p_dev_final_192_splits.json`. Copy
+`gauntlet_correct`, `consistency_all_agree`, and the `"dev fair"` value of the 192-token run.
+
+Commit: `git add results/r9p/B1 && git commit -m "r9p step B1: r8p suites" && git push origin claude/nice-hamilton-3ttcwr`
+
+### Step C (training)
 
 ```bash
-python -m eval.gauntlet --ckpt runs/v10-r8p-final/best.pt --k 16 --out runs/v10-r8p-final/gauntlet.json
-python -m eval.consistency --groups 300 --ckpt runs/v10-r8p-final/best.pt --k 16 --out runs/v10-r8p-final/consistency.json
-python -m eval.evaluate --ckpt runs/v10-r8p-final/best.pt --sets unseen   # as in the 2026-10-27 check (99.57%)
+colab/r9p/run_step.sh C
 ```
 
-Write all numbers into HANDOFF.md before training.
+Check: open `results/r9p/C/C_summary.json`. Copy `r9p_sha256` and `r9p_dev_quick_adaptive_hybrid` (`"dev fair"`).
+This quick score uses a lighter setting than FINAL, so it is lower than 73.9% and is not the decision.
 
-### 1b. Mine real exam patterns (dev only; counts, never text)
+Commit: `git add results/r9p/C && git commit -m "r9p step C: training" && git push origin claude/nice-hamilton-3ttcwr`
+
+### Step B2
 
 ```bash
-python -m eval.mine_patterns --trace runs/v10-r8p-final/trace_dev.jsonl --out runs/patterns_dev.json
-python -m eval.mine_patterns --gen_files data/mix_r8.jsonl.gz data/balanced_mix_v1.jsonl.gz --gen_n 0 --out runs/patterns_vs_training.json
+colab/r9p/run_step.sh B2
 ```
 
-The report compares real dev questions with generated (or training) questions feature by feature: openings
-(pointing, introducing, coded, "family of N", directions sets), question forms, constructions ("only", of-chains,
-pronouns, Hindi words, professions), kin words, coded expression size, length, people, options and answers, plus
-masked question skeletons shared by at least 3 dev questions. `gaps` lists what real questions use at least twice as
-often as the generator; `misses` lists the features of the dev questions the model got wrong. Commit both JSON files
-(they hold no question text), then extend `kinlogic/generate.py` for the largest gaps and misses, weighted by real
-share, before building the r9p data. On the 152 hand-written exam-style questions (a stand-in run here) the largest
-gaps were 4-option multiple choice (95% vs 16% generated), "How is X related to Y?" (84% vs 25%), "only" (36% vs
-10%), of-chains (13% vs 3%), paternal/maternal (9% vs 2%), Hindi kin words (5% vs 0.1%) and 3-operator coded
-expressions (4% vs 1%); the real dev numbers decide.
+Check: open `results/r9p/B2/B_r9p_summary.json`. Copy `gauntlet_correct` and `consistency_all_agree`.
 
-## 2. Freeze the new locked test before any new work looks at new questions
+Commit: `git add results/r9p/B2 && git commit -m "r9p step B2: r9p suites" && git push origin claude/nice-hamilton-3ttcwr`
+
+### Step D (decision)
 
 ```bash
-python -m eval.sites --sites <new sites only>        # scrape sites that are not in data/real_questions
-python -m eval.locked --freeze --pattern 'data/fresh_online/*.jsonl'
+colab/r9p/run_step.sh D
 ```
 
-If fewer than 3 new sites are available, skip this step and say so; the v1 locked test then stays the final measure.
+Check: open `results/r9p/D/decision.json`. Copy `adopt`, `config`, `extra_flags`, `dev.old_fair`, `dev.new_fair`,
+`dev.gain_points`, `dev.wins`, `dev.losses`, `dev.p`, `gauntlet`, `consistency_all_agree`. The rule is fixed:
 
-## 3. Training data for r9p
+> adopt r9p only if its dev fair score is at least 2 points higher than r8p's, it wins more dev questions than it
+> loses, McNemar p < 0.05, and its gauntlet and consistency scores are not lower by more than 1 point.
 
-Keep everything r8p trained on and add the balanced supplement (exact generator facts, engine-checked):
+Commit: `git add results/r9p/D && git commit -m "r9p step D: decision" && git push origin claude/nice-hamilton-3ttcwr`
 
-| File | Rows | Use |
+- If `adopt` is `false`: the run is finished. Write the report. Do not run E.
+- If `adopt` is `true`: write the report and ask the owner: "Step D adopts r9p. Approve the one-time locked test
+  (step E)?" Wait.
+
+### Step E (only after the owner writes "approve locked")
+
+1. Allow the one locked run, run it, and lock it again (three commands, exactly):
+   ```bash
+   sed -i 's/ALLOW_LOCKED = False/ALLOW_LOCKED = True/' colab/r9p/E_locked/notebook.ipynb
+   colab/r9p/run_step.sh E
+   sed -i 's/ALLOW_LOCKED = True/ALLOW_LOCKED = False/' colab/r9p/E_locked/notebook.ipynb
+   ```
+2. Check `results/r9p/E/E_summary.json`: copy `r9p_test` (`"test fair"` and `"test verified"`).
+3. Check that `git diff colab/r9p/E_locked/notebook.ipynb` prints nothing (the lock is back on).
+4. Commit: `git add results/r9p/E && git commit -m "r9p step E: locked test, scored once" && git push origin claude/nice-hamilton-3ttcwr`
+
+## 6. If something stops
+
+| Message | Meaning | What you do |
 | --- | --- | --- |
-| `data/reworded.jsonl.gz` | as before | `*2`, as r8p |
-| `data/mix_r8.jsonl.gz` | as before | as r8p (rows with > 32 people are now dropped by `reader.encode_example`) |
-| `star_r3.jsonl.gz` (r8p notebook output) | as before | `*2`, as r8p |
-| `data/balanced_mix_v1.jsonl.gz` | 22,500 (9 formats x 2,500; questions 79% ask, 21% who/gender/pair/count/claims) | new: `*2` (see the manifest) |
-| `data/detour_v1.jsonl.gz` | 4,000 (1, 2, 3 detours: 1,334 / 1,333 / 1,333) | new: `*1` (`build_detours.py`) |
-| `data/gemini_synthetic_v1.jsonl.gz` | 1,015 | optional, variant B only |
+| `STOP: attach the private dataset kinthread-real-questions` | wrong dataset name | redo section 4 steps 3-4 |
+| `STOP: no best.pt with SHA-256 38c289...` | r8p checkpoint not found | stop; tell the owner the r8p notebook output (`notebook99ae0586bd`) is not reachable |
+| `STOP: attach the final-selection notebook output` | FINAL.json / verifier.json missing | stop; tell the owner `notebookf8798397a0` output is not reachable |
+| `STOP: r8p dev fair is N/714 but FINAL.json says 528/714` | setup differs from the final selection | stop; report N |
+| `STOP: training files missing` | Google Drive download failed | run step C once more; if it stops again, report it |
+| `STOP: attach the output of kinthread-r9p-...` | an earlier step did not pass | run that earlier step first |
+| `STOP: command failed: ...pytest...` | a test failed on Kaggle | stop; report the failing test name from the log in `~/kaggle_r9p/<STEP>` |
+| `CUDA out of memory` in the step C log | GPU too small for block 512 | stop; report it (the owner decides about `--accum 2`) |
+| `non-finite loss` in the step C log | training diverged | stop; report it (the owner decides about lr 2e-4) |
+| Kaggle quota or "no GPU available" | weekly GPU hours used up | wait for the weekly reset, then run the same step again |
+| any other `STOP:` line | unexpected | stop; report the step and the exact line |
 
-`balanced_mix_v1` includes LogiQAte-style detours (`q_obfuscated`), lines of descent up to ten generations and deep
-cousins (`q_generations`), long and two-family stories, and every format at the same count. Rebuild it with:
-`python build_balanced.py --per_format 2500 --seed 11 --out data/balanced_mix_v1.jsonl.gz --extra data/balanced_question_formats_v1.jsonl.gz`.
-`train_reader` applies the leak guard to every row (real questions, held-out rewrites, the unseen set and the gauntlet).
+Never fix a problem by editing code, tests or notebooks. Report it.
 
-## 4. Train r9p (warm start from r8p, same architecture)
+## 7. Report (fill in, append to HANDOFF.md, and reply with it)
 
-Same recipe as r8p (`colab/r8p_kaggle.ipynb`), with the new data and a longer block so long stories fit with a
-192-token reading. `colab/r9p_kaggle.ipynb` is ready (Save & Run All; it checks the r8p SHA-256). It differs from r8p only in:
+```markdown
+## r9p run (YYYY-MM-DD)
 
-```python
-EXTRA = [f'{DATA}/reworded.jsonl.gz*2', 'data/mix_r8.jsonl.gz', f'{S}/star_r3.jsonl.gz*2', 'data/balanced_mix_v1.jsonl.gz*2',
-         'data/detour_v1.jsonl.gz']
+| Measure | r8p | r9p |
+| --- | --- | --- |
+| Real dev fair, FINAL setting | <A: r8p_dev "dev fair"> | <D: dev.new_fair> |
+| Gain (points), wins / losses, McNemar p | | <D: gain_points>, <wins> / <losses>, p=<p> |
+| Dev fair with 192-token reading | <B1: "dev fair"> | (in D config final_plus) |
+| Gauntlet correct | <B1: gauntlet_correct> | <B2: gauntlet_correct> |
+| Consistency, all variants agree | <B1: consistency_all_agree> | <B2: consistency_all_agree> |
+| Locked test fair / verified | 68.8% / 72.2% (scored 2026-10-26) | <E: test fair> / <test verified>, or "not run" |
+
+- Flags adopted in step A: <flags_adopted or "none">
+- Step D decision: <adopt true/false>, config <config>, extra flags <extra_flags>
+- r9p checkpoint SHA-256: <C: r9p_sha256>
+- Largest exam-pattern gaps (A): <5 lines>
+- Most missed patterns (A): <5 lines>
+- Problems: <none, or the STOP line and step>
 ```
 
-```bash
-PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python train_reader.py --arch v10 --run v10-r9p --out runs/v10-r9p \
-  --pool {DATA} --init runs/v10-r8p-final/best.pt --prefix_lm --of_form --style_p 0.8 --steps 15000 --batch 64 \
-  --lr 3e-4 --warmup 500 --optim muon --amp --workers 2 --resume --eval_every 1500 --save_every 1000 \
-  --reworded {EXTRA} --reworded_dev data/reworded_dev.jsonl.gz --p_reworded 0.75 --ramp_steps 2000 --block 512 \
-  --real_dev 575 --select_real
-```
+Also add one line to the handoff log at the end of `AGENTS.md`:
+`- YYYY-MM-DD (r9p run): step D <adopted r9p / kept r8p>; dev fair <r8p> -> <r9p>; locked <result or not run>. Results in results/r9p/.`
 
-- If memory runs out at `--block 512`, use `--accum 2` (same effective batch), not a smaller model.
-- Variant B (only if the Kaggle quota allows a second run): add `'data/gemini_synthetic_v1.jsonl.gz*2'` to EXTRA.
-- Do not change the tokenizer, vocabulary or architecture in r9p: that would be v11.
-- Watch `fit_health` output: a non-finite loss stops the run (by design); restart from the last checkpoint with a
-  lower lr (2e-4), never by disabling the check.
+Commit: `git add HANDOFF.md AGENTS.md && git commit -m "r9p run report" && git push origin claude/nice-hamilton-3ttcwr`
 
-## 5. Select (dev only)
+## 8. Not part of this run (the owner decides later)
 
-1. Retrain the verifier for the new checkpoint: `python train_verifier.py --ckpt runs/v10-r9p/best.pt --n 1500 --out runs/v10-r9p/verifier.json`.
-2. Run the same setting sweep as `colab/final_kaggle.ipynb` (base, cover, para2, split, verifier, k16, all) on dev,
-   plus the flags that won in step 1 and `--max_new 192 --reserve 8`.
-3. Adopt r9p only if its best dev fair score beats r8p's 73.9% by at least 2 points (McNemar p < 0.05 on the paired
-   questions), and the gauntlet, consistency and unseen scores are not worse than r8p's.
-4. Ensemble check (allowed: no weights change): `--ensemble runs/v10-r8p-final/best.pt` on the r9p run; keep it only
-   if it wins on dev.
+- Changing the generator from the pattern-mining results (step A writes them; Claude uses them in a later session).
+- The story supplement (stories of 240-400 words with at most 32 people, and two-family stories).
+- A larger model (v11), exporting r9p to the website, or any deploy.
 
-## 6. Locked score (once)
+---
 
-For the single selected checkpoint and setting only:
+## Background for humans (Codex does not need this section)
 
-```bash
-python -m eval.run_real --ckpt <pick> --split test <selected flags> --out runs/<pick>/real_test.json          # v1
-python -m eval.run_real --ckpt <pick> --pattern 'data/fresh_online/*.jsonl' --split locked2 <selected flags>  # v2, if frozen
-```
-
-Report both with the dev numbers and the r8p baseline. Never re-tune after seeing them.
-
-## 7. After training (only when the owner asks)
-
-Export with `python export_reader_web.py --ckpt <pick> --verifier ... --final ... --name-table ...`, run
-`python verify_model.py`, update `model_manifest.json`, then follow Kinthread's AGENTS.md for `bun run sync`,
-`bun run check` and a browser check before any deploy.
-
-## Hypotheses to test toward 85-90% (in this order; each is kept only if dev says so)
-
-1. Answer-stage flags (step 1): free, from one traced run.
-2. Output budget 192 + reserve: long stories lose their question statement at 96 tokens.
-3. r9p data: balanced formats, detours, deep generations, two-family stories (step 4).
-4. Consistency-filtered self-training (Stratified Consistency Distillation, arXiv 2608.30258): on generated or
-   Gemini-rewritten questions only (never real ones), take 16 readings, group them by the engine's answer, keep rows
-   whose largest group holds at least 75% of the weight and whose answer matches the generator's, and add them as
-   STaR rows (`star.py`) for r10p.
-5. Minimal pairs (counterfactual augmentation, arXiv 2605.04330): up-weight `kinlogic.generate.flip_pair` rows,
-   which change one word and the answer, so the reader cannot answer from surface statistics.
-6. Paraphrase voting at inference (`--para`), already in FINAL; try `--para 4` with the detour suite.
-7. v11, only if 1-6 plateau below 85% on dev: a larger reader (e.g. 24 x 512) trained with the same data; it
-   doubles browser download and memory, so it needs the owner's decision first.
-
-Open-source material worth reading: KinshipQA generator and data (github.com/TiandaSun/Kinship-Data-Benchmark-for-Multi-hop-Reasoning,
-CC BY 4.0; its descriptive-system categories 1-3 are a usable external test), LogiQAte (huggingface.co/datasets/abhilekhborah/LogiQAte,
-blood-relation obfuscation), CLUTRR (github.com/facebookresearch/clutrr), and the implicit-deduction code
-(github.com/envomp/Implicit-Deductive-Reasoning-in-Transformers).
+- **r8p:** v10-r8p, step 6,000, SHA-256 `38c289d351d6517b5cde1bc9fb64ea97bd33eee193639d6351edda52fdfd7a52`, 39.5M
+  exact fp32 parameters. Real dev 73.9% fair / 77.2% verified; locked test 68.8% / 72.2%.
+- **Weak spots measured on 2026-10-28:** gauntlet (browser pipeline, 667 questions) 92.1% overall but claims 63%,
+  family puzzles 70%, two detours 77%, data sufficiency 77%; renamed twins agree 100%, two-detour versions only 73%.
+  Generated sets score 92-99%, real exams 69%: the main gap is real-exam wording.
+- **New r9p training data:** `data/balanced_mix_v1` (22,500 rows, 9 formats x 2,500) x2 and `data/detour_v1` (4,000)
+  on top of r8p's data; `--block 512` (keeps 146 mix_r8 rows of 449-512 tokens that r8p skipped). Rows with more than
+  32 people (2.2% of mix_r8, mostly joined long questions) are skipped: the model has 32 person tokens.
+- **Answer-stage flags** (`--closure`, `--core_repair`, `--lever`, `--trace_pow`) are replayed from the step A trace
+  without the model (`eval.rescore_trace`), adopted only with McNemar p < 0.05 on dev.
+- **Pipeline code:** `colab/r9p/build_notebooks.py` writes the six notebooks and their `kernel-metadata.json`;
+  `colab/r9p/run_step.sh` runs one step; `eval/compare_runs.py` applies the adoption rule; public outputs hold counts
+  only, private outputs (real question text) never leave Kaggle and `~/kaggle_r9p`.
+- **Hypotheses after r9p, in order** (each kept only if dev says so): consistency-filtered self-training on generated
+  questions (arXiv 2608.30258); minimal-pair rows (`flip_pair`, arXiv 2605.04330); generator changes from the
+  pattern-mining gaps; `--para 4`; v11 (a larger reader) only if all of these plateau below 85% on dev.
+- **Open data worth a look:** KinshipQA (github.com/TiandaSun/Kinship-Data-Benchmark-for-Multi-hop-Reasoning),
+  LogiQAte (huggingface.co/datasets/abhilekhborah/LogiQAte), CLUTRR (github.com/facebookresearch/clutrr).

@@ -25,6 +25,8 @@ SETTINGS = {
     'all': {'CLOSURE': True, 'CORE_REPAIR': True, 'LEVER': True, 'TRACE_POW': 1.0},
 }
 FLAGS = ('CLOSURE', 'CORE_REPAIR', 'LEVER', 'TRACE_POW')
+CLI = {'closure': '--closure', 'core_repair': '--core_repair', 'lever': '--lever', 'trace_pow1': '--trace_pow 1',
+       'closure+core': '--closure --core_repair', 'all': '--closure --core_repair --lever --trace_pow 1'}
 
 
 def replay_reader(rec):
@@ -86,12 +88,29 @@ def report(recs, ok, same) -> str:
     return '\n'.join(lines)
 
 
+def decide(ok, alpha: float = 0.05) -> dict:
+    """Per setting: correct, wins and losses against base, McNemar p, and adopt (more wins than losses, p < alpha);
+    'adopted_cli' is the run_real flags of the best adopted setting ('' when none wins)."""
+    out = {'questions': len(ok['base']), 'settings': {}}
+    for name, got in ok.items():
+        b = sum(g and not o for g, o in zip(got, ok['base']))
+        c = sum(o and not g for g, o in zip(got, ok['base']))
+        p = mcnemar(b, c)
+        out['settings'][name] = {'correct': sum(got), 'wins': b, 'losses': c, 'p': round(p, 4),
+                                 'adopt': name != 'base' and b > c and p < alpha}
+    won = [n for n, s in out['settings'].items() if s['adopt']]
+    best = max(won, key=lambda n: out['settings'][n]['correct'], default=None)
+    out['adopted'], out['adopted_cli'] = best, CLI.get(best, '')
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('trace')
     ap.add_argument('--verifier', default=None, help='the verifier weights the traced run used')
     ap.add_argument('--cover', action='store_true', help='the traced run used --cover')
     ap.add_argument('--all', action='store_true', help='include broken (unfair) questions')
+    ap.add_argument('--out', default=None, help='JSON with every setting and the flags to adopt (no question text)')
     a = ap.parse_args()
     if a.verifier:
         os.environ['KIN_VERIFIER'] = a.verifier
@@ -101,6 +120,9 @@ def main():
     recs = [r for r in recs if a.all or r.get('fair', True)]
     ok, same = rescore(recs)
     print(report(recs, ok, same))
+    if a.out:
+        with open(a.out, 'w') as f:
+            json.dump({**decide(ok), 'reproduced': same}, f, indent=1)
 
 
 if __name__ == '__main__':
