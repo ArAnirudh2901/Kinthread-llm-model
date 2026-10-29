@@ -90,3 +90,27 @@ any changed data from LLM-From-Scratch, regenerate `data/SHA256SUMS` if data cha
 - 2026-10-28 (long-story reader baseline): Long-story baseline diagnostic (same fixed 15 rows: five each from 80–120, 121–170, and 171–240 configured word bands): current v10-r8p checkpoint SHA remains 38c289d351d6517b5cde1bc9fb64ea97bd33eee193639d6351edda52fdfd7a52. Python reader top-1 matched 5/15 gold answers at the default 96 generated-token cap and 12/15 when only the diagnostic cap was raised to 192. All 1,250 long-story prefixes fit within 236 tokens, below the 320-token prefix budget with max_new=192, so the test did not truncate their input. Three medium/extended cases still failed. This tiny same-generator sample is diagnostic, not an accuracy estimate; no model weights or production runtime changed.
 
 - 2026-10-28 (synthetic-data candidates and long-story baseline): added `generate_balanced_question_types.py` and forced direct/indirect modes in `kinlogic/generate.py`; `kinlogic/speech.py` now parses an explicit named speaker in reported clauses. The deterministic graph-generated candidate contains 3,750 rows: 1,250 each direct speech, indirect speech, and long stories; 25 canonical answer buckets have exactly 50 rows per format. All rows were accepted by the exact readers/solver; the 2,500 speech MCQs each have five parsed options with one gold answer, and paired direct/indirect examples preserve facts, query, and answer. Data SHA-256: `315dccb5d2a9bdf0b3f32441601babb6b22d21eb73ad8b4545a51e7311e5cd88`. Separately added a paced, resumable Gemini rewrite generator and stronger prompts/structured-output validation in `kinlogic/reword.py`; the committed Gemini candidate has 1,015 accepted rows from 2,069 attempts (49.1%), 204 focused rows, and 275 tracked API requests at an 8-second minimum interval. It is not relation/format balanced. The Gemini candidate and balanced candidate are separate; neither has been trained on. The v10-r8p checkpoint is unchanged (SHA `38c289d351d6517b5cde1bc9fb64ea97bd33eee193639d6351edda52fdfd7a52`). A fixed 15-story diagnostic was 5/15 at the 96-token generation cap and 12/15 at 192; this is a tiny same-generator diagnostic, not an accuracy estimate. The locked exam remains 68.8% fair / 72.2% verified. See `SYNTHETIC_DATASET_PLAN.md`, `HANDOFF.md`, and `RESEARCH.md` before deciding what to test next; do not infer a training gain or tune against the locked test.
+
+- 2026-10-28 (dev trace instrumentation): added `eval/trace.py` (observing hooks on the exact readers and
+  `exam.candidates`), `eval/trace_report.py`, and `--trace` / `--trace_shadow` in `eval.run_real`; tests in
+  `tests/test_trace.py` (6 pass without torch). Not yet run on the private dev set; see HANDOFF.md for the Kaggle
+  command and how to read the buckets. Answers are unchanged by tracing. Written in this mirror (cloud session without
+  the canonical LLM-From-Scratch checkout): copy `eval/trace*.py`, the `eval/run_real.py` change and the test there.
+- 2026-10-28 (answer-stage flags, balance, repeatability; cloud mirror, no torch): added off-by-default flags
+  `--closure --core_repair --lever --trace_pow --max_new --reserve` to `eval.run_real` with an offline replay
+  (`eval.rescore_trace`, McNemar vs base), `eval.balance_report`, `build_balanced.py`, detour questions
+  (`kinlogic.generate.obfuscation_set` / `q_obfuscated`, opt-in) and `eval.consistency` (rename, option shuffle,
+  reorder, detours; gold facts 100% agree, rule readers 96.7%). Fixed: "my. wife" stray period; rows with > 32 people
+  are dropped instead of encoded as `<unk>` (2.2% of mix_r8). 117 non-torch tests pass. Website decoder parity fixes
+  are in Kinthread (runtime a171d14ed9a4). Checkpoint unchanged; nothing deployed. See HANDOFF.md (2026-10-28 decoder
+  parity section) for commands and what still needs a Kaggle run. Locked test v2 (`eval/locked.py`, `--split locked2`):
+  held-out new sites, hashes only, scored once with a ledger; not frozen yet (needs new scraped sites).
+- 2026-10-28 (gauntlet and r9p plan): `eval/gauntlet.py` (1,140 generated hard questions in 19 categories, twins,
+  plus 28 hand-written twisted ones in `eval/twisted_set.py`; gold 100%, rules alone 45.7%). Browser production
+  pipeline on 667 of them: 92.1% (claims 63%, puzzles 70%, two detours 77%, sufficiency 77%). Deep lineages up to ten
+  generations (`q_generations`). `colab/r9p/` (six notebooks) and `TRAINING_V11_CODEX.md` hold the next training run.
+- 2026-10-29: `eval/mine_patterns.py` mines real dev question patterns (counts and masked skeletons only) against
+  generator or training output, with per-feature dev accuracy from a trace; run it before building r9p data (step 1b).
+- 2026-10-29 (r9p run-book): `TRAINING_V11_CODEX.md` rewritten for Codex as a fixed run-book; six Kaggle notebooks in
+  `colab/r9p/` (A baseline, B1/B2 suites, C train, D select, E locked), runner `colab/r9p/run_step.sh`, computed
+  decisions (`eval/compare_runs.py`, `eval.rescore_trace --out`). Locked test only after the owner writes "approve locked".
