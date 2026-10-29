@@ -18,7 +18,7 @@ W = '/kaggle/working'
 PUB, PRIV = f'{W}/public', f'{W}/private'   # public: counts only, safe to commit; private: real question text, never commit
 os.makedirs(PUB, exist_ok=True)
 os.makedirs(PRIV, exist_ok=True)
-REPO, BRANCH = '/kaggle/temp/Kinthread-llm-model', 'claude/nice-hamilton-3ttcwr'
+REPO, X
 R8P_SHA = '38c289d351d6517b5cde1bc9fb64ea97bd33eee193639d6351edda52fdfd7a52'
 
 

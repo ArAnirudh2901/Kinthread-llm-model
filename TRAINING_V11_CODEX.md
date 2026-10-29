@@ -14,7 +14,7 @@ Copy everything inside the box into Codex as the task.
 You are running a fixed, already-written machine-learning pipeline. Do not design or change anything.
 
 Repository: https://github.com/ArAnirudh2901/Kinthread-llm-model
-Branch: claude/nice-hamilton-3ttcwr (work and push only on this branch)
+Branch: main (work and push only on this branch)
 Instructions: the file TRAINING_V11_CODEX.md in that branch. Follow sections 3 to 8 exactly.
 
 How to work:
@@ -52,7 +52,7 @@ only with the owner's approval, r9p is scored once on the locked test (step E). 
 2. The locked test (step E) is scored at most once, and only after the owner writes "approve locked".
 3. Never quantize, distil or shrink the model. Never change the architecture, tokenizer or vocabulary.
 4. Commits are authored as `Anirudh Aravalli <anirudh30012005@gmail.com>`, with no AI attribution lines.
-5. Push only to `claude/nice-hamilton-3ttcwr`. Do not open pull requests. Do not deploy anything.
+5. Push only to `main`. Do not open pull requests. Do not deploy anything.
 6. Do not print, log or commit the Kaggle token (`~/.kaggle/kaggle.json`).
 
 ## 4. One-time setup
@@ -61,7 +61,7 @@ Run these in the repository root, in order.
 
 1. Get the branch:
    ```bash
-   git clone -b claude/nice-hamilton-3ttcwr https://github.com/ArAnirudh2901/Kinthread-llm-model.git
+   git clone -b main https://github.com/ArAnirudh2901/Kinthread-llm-model.git
    cd Kinthread-llm-model
    git config user.name "Anirudh Aravalli"
    git config user.email "anirudh30012005@gmail.com"
@@ -117,7 +117,7 @@ Check: open `results/r9p/A/A_summary.json`.
 
 Commit:
 ```bash
-git add results/r9p/A && git commit -m "r9p step A: r8p dev baseline, flag replay, exam patterns" && git push origin claude/nice-hamilton-3ttcwr
+git add results/r9p/A && git commit -m "r9p step A: r8p dev baseline, flag replay, exam patterns" && git push origin main
 ```
 
 ### Step B1
@@ -129,7 +129,7 @@ colab/r9p/run_step.sh B1
 Check: open `results/r9p/B1/B_r8p_summary.json` and `results/r9p/B1/r8p_dev_final_192_splits.json`. Copy
 `gauntlet_correct`, `consistency_all_agree`, and the `"dev fair"` value of the 192-token run.
 
-Commit: `git add results/r9p/B1 && git commit -m "r9p step B1: r8p suites" && git push origin claude/nice-hamilton-3ttcwr`
+Commit: `git add results/r9p/B1 && git commit -m "r9p step B1: r8p suites" && git push origin main`
 
 ### Step C (training)
 
@@ -140,7 +140,7 @@ colab/r9p/run_step.sh C
 Check: open `results/r9p/C/C_summary.json`. Copy `r9p_sha256` and `r9p_dev_quick_adaptive_hybrid` (`"dev fair"`).
 This quick score uses a lighter setting than FINAL, so it is lower than 73.9% and is not the decision.
 
-Commit: `git add results/r9p/C && git commit -m "r9p step C: training" && git push origin claude/nice-hamilton-3ttcwr`
+Commit: `git add results/r9p/C && git commit -m "r9p step C: training" && git push origin main`
 
 ### Step B2
 
@@ -150,7 +150,7 @@ colab/r9p/run_step.sh B2
 
 Check: open `results/r9p/B2/B_r9p_summary.json`. Copy `gauntlet_correct` and `consistency_all_agree`.
 
-Commit: `git add results/r9p/B2 && git commit -m "r9p step B2: r9p suites" && git push origin claude/nice-hamilton-3ttcwr`
+Commit: `git add results/r9p/B2 && git commit -m "r9p step B2: r9p suites" && git push origin main`
 
 ### Step D (decision)
 
@@ -164,7 +164,7 @@ Check: open `results/r9p/D/decision.json`. Copy `adopt`, `config`, `extra_flags`
 > adopt r9p only if its dev fair score is at least 2 points higher than r8p's, it wins more dev questions than it
 > loses, McNemar p < 0.05, and its gauntlet and consistency scores are not lower by more than 1 point.
 
-Commit: `git add results/r9p/D && git commit -m "r9p step D: decision" && git push origin claude/nice-hamilton-3ttcwr`
+Commit: `git add results/r9p/D && git commit -m "r9p step D: decision" && git push origin main`
 
 - If `adopt` is `false`: the run is finished. Write the report. Do not run E.
 - If `adopt` is `true`: write the report and ask the owner: "Step D adopts r9p. Approve the one-time locked test
@@ -180,7 +180,7 @@ Commit: `git add results/r9p/D && git commit -m "r9p step D: decision" && git pu
    ```
 2. Check `results/r9p/E/E_summary.json`: copy `r9p_test` (`"test fair"` and `"test verified"`).
 3. Check that `git diff colab/r9p/E_locked/notebook.ipynb` prints nothing (the lock is back on).
-4. Commit: `git add results/r9p/E && git commit -m "r9p step E: locked test, scored once" && git push origin claude/nice-hamilton-3ttcwr`
+4. Commit: `git add results/r9p/E && git commit -m "r9p step E: locked test, scored once" && git push origin main`
 
 ## 6. If something stops
 
@@ -225,7 +225,7 @@ Never fix a problem by editing code, tests or notebooks. Report it.
 Also add one line to the handoff log at the end of `AGENTS.md`:
 `- YYYY-MM-DD (r9p run): step D <adopted r9p / kept r8p>; dev fair <r8p> -> <r9p>; locked <result or not run>. Results in results/r9p/.`
 
-Commit: `git add HANDOFF.md AGENTS.md && git commit -m "r9p run report" && git push origin claude/nice-hamilton-3ttcwr`
+Commit: `git add HANDOFF.md AGENTS.md && git commit -m "r9p run report" && git push origin main`
 
 ## 8. Not part of this run (the owner decides later)
 
