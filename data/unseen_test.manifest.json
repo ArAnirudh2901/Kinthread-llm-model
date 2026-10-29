@@ -1,0 +1,60 @@
+{
+ "rows": 1400,
+ "dropped_seen_wording": 300,
+ "by_kind": {
+  "claims": 99,
+  "coded": 100,
+  "deep": 97,
+  "identity": 83,
+  "introduce": 31,
+  "nested": 12,
+  "puzzle": 100,
+  "speech": 76,
+  "statements": 75,
+  "story": 95,
+  "sufficiency": 83,
+  "deep-statements": 102,
+  "deep-nested": 100,
+  "deep-speech": 110,
+  "deep-coded": 118,
+  "deep-story": 119
+ },
+ "by_depth": {
+  "0": 754,
+  "1": 26,
+  "2": 44,
+  "3": 42,
+  "4": 50,
+  "5": 50,
+  "6": 54,
+  "7": 63,
+  "8": 59,
+  "9": 58,
+  "10": 62,
+  "11": 68,
+  "12": 70
+ },
+ "names": {
+  "indian": [
+   300,
+   300
+  ],
+  "world": [
+   300,
+   300
+  ]
+ },
+ "name_examples": [
+  "Libin",
+  "Thejapaal",
+  "Mantu",
+  "Ambaalaal",
+  "Hareraam",
+  "Michela",
+  "Sherika",
+  "Edie",
+  "Mitzi",
+  "Breann"
+ ],
+ "sha256": "42d1a89c1a6bc4215b0b1c9e8faf6e50be0a98a84e26f627db77c8e5a14bad0d"
+}

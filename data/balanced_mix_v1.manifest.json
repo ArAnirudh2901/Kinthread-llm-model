@@ -1,0 +1,96 @@
+{
+ "rows": 22500,
+ "sha256": "d52e691493f1b4ae75a12a0bffddb7418127ed3e939894032925fc76ed3a371f",
+ "command": "python build_balanced.py --per_format 2500 --seed 11 --out data/balanced_mix_v1.jsonl.gz --extra data/balanced_question_formats_v1.jsonl.gz",
+ "short": {},
+ "rejected": {
+  "skipped (cell full or duplicate)": 2158796,
+  "failed check: statements": 352,
+  "failed check: speech": 267,
+  "failed check: identity": 228,
+  "failed check: nested": 146,
+  "failed check: story": 120,
+  "failed check: introduce": 46,
+  "failed check: long_story": 21,
+  "failed check: puzzle": 2
+ },
+ "note": "candidate: not trained on; exact generator facts",
+ "format": {
+  "coded": 2500,
+  "possessive chain": 2500,
+  "statements": 2500,
+  "nested clauses": 2500,
+  "family puzzle": 2500,
+  "direct speech": 2500,
+  "long story": 2500,
+  "indirect speech": 2500,
+  "data sufficiency": 2500
+ },
+ "question": {
+  "ask": 17779,
+  "none": 1585,
+  "who": 1253,
+  "gender": 760,
+  "pair": 738,
+  "count": 292,
+  "prof": 93
+ },
+ "facts": {
+  "<=4": 5254,
+  "<=6": 3235,
+  "<=2": 3178,
+  "<=3": 3136,
+  "<=12": 2788,
+  ">12": 2716,
+  "<=8": 1914,
+  "<=1": 279
+ },
+ "people": {
+  "<=2": 6625,
+  "<=3": 4741,
+  "<=6": 4234,
+  "<=12": 2713,
+  "<=4": 2023,
+  "<=8": 1470,
+  "<=20": 666,
+  "<=32": 28
+ },
+ "input tokens": {
+  "<=40": 10060,
+  "<=80": 6110,
+  "<=160": 3690,
+  "<=20": 1692,
+  "<=240": 948
+ },
+ "fact tokens": {
+  "<=32": 9994,
+  "<=16": 6457,
+  "<=64": 3837,
+  "<=96": 1032,
+  "<=128": 659,
+  "<=192": 521
+ },
+ "options": {
+  "open": 19525,
+  "mcq": 2975
+ },
+ "kind": {
+  "puzzle": 3707,
+  "sufficiency": 3030,
+  "speech": 2949,
+  "story": 2793,
+  "coded": 2083,
+  "statements": 1507,
+  "claims": 1189,
+  "introduce": 1024,
+  "generations": 989,
+  "deep-statements": 527,
+  "identity": 511,
+  "deep-speech": 496,
+  "deep-nested": 447,
+  "deep-coded": 417,
+  "nested": 305,
+  "deep-story": 268,
+  "obfuscated": 258
+ }
+}
