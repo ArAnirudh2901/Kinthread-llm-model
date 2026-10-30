@@ -262,21 +262,10 @@ All work is on `main` in Kinthread-llm-model, Kinthread and LLM-From-Scratch. `v
 `2_Training_Tiny_LLM` was synced from this repo (60 files, none diverged). Notebooks and the r9p run-book clone `main`.
 The answer-option tests now state the gender they need, so they pass without the name table.
 
-## 2026-10-30 — r9p notebooks fixed; step C on Colab
+## 2026-10-30 — r9p notebooks fixed
 
 The r9p notebooks A-E all started with `REPO, X` (a bad branch-rename edit), which raises NameError in the first
 cell; fixed, and `tests/test_r9p_notebooks.py` now checks every r9p notebook for undefined names with pyflakes.
-
-Step C (training) can run without Kaggle: open `colab/r9p/C_train_colab.ipynb` in Colab (GPU runtime), after putting
-two private files in `MyDrive/kinthread_r9p/`:
-
-- `best.pt`: v10-r8p, SHA-256 `38c289d351d6517b5cde1bc9fb64ea97bd33eee193639d6351edda52fdfd7a52` (the output of
-  Kaggle `notebook99ae0586bd`, downloadable without GPU time, or `best.zip` on the Mac);
-- `real_questions_full.tgz`: the file in the private Kaggle dataset `kinthread-real-questions` (dev questions select
-  the checkpoint; nothing real is trained on).
-
-Run all cells. Training data and the command are the Kaggle `C_train` ones (generated from the same cells).
-Checkpoints go to `MyDrive/kinthread_r9p/runs/v10-r9p` every 1,000 steps; after a disconnect, run all cells again and
-`--resume` continues. The end writes `public/C_summary.json` (counts only) next to them; copy it to
-`results/r9p/C/`. Steps B2 and D still expect the r9p checkpoint as a Kaggle notebook output.
-
+Training stays on Kaggle: run `colab/r9p/run_step.sh C` (or the full order A, B1, C, B2, D) from a machine with the
+Kaggle CLI signed in as `anirudharavalli`, once that account has GPU quota. A Claude cloud session can run it too if
+its environment allows kaggle.com and holds the token as `KAGGLE_USERNAME` / `KAGGLE_KEY`.

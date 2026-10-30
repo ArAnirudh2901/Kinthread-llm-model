@@ -184,7 +184,7 @@ print('B DONE')
     return cells
 
 
-C_DATA = '''
+C = [code(COMMON + R8P + '''
 sh('pip -q install -U gdown')
 S = '/kaggle/temp/share'
 os.makedirs(S, exist_ok=True)
@@ -195,8 +195,7 @@ if not os.path.exists(f'{S}/star_r3.jsonl.gz'):
 DATA, OUT = f'{S}/dataset_v7', f'{W}/runs/v10-r9p'
 os.makedirs(OUT, exist_ok=True)
 sh('cd data && sha256sum -c SHA256SUMS --ignore-missing --quiet')
-'''
-C_TRAIN = '''
+'''), code('''
 EXTRA = [f'{DATA}/reworded.jsonl.gz*2', 'data/mix_r8.jsonl.gz', f'{S}/star_r3.jsonl.gz*2',
          'data/balanced_mix_v1.jsonl.gz*2', 'data/detour_v1.jsonl.gz']
 missing = [e for e in EXTRA if not os.path.exists(e.split('*')[0])]
@@ -207,8 +206,7 @@ sh('PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python train_reader.py --ar
    '--steps 15000 --batch 64 --lr 3e-4 --warmup 500 --optim muon --amp --workers 2 --resume '
    '--eval_every 1500 --save_every 1000 --reworded ' + ','.join(EXTRA) + ' --reworded_dev data/reworded_dev.jsonl.gz '
    '--p_reworded 0.75 --ramp_steps 2000 --block 512 --real_dev 575 --select_real')
-'''
-C_END = '''
+'''), code('''
 sh(f'rm -f {OUT}/latest.pt')
 best = f'{OUT}/best.pt'
 if not os.path.exists(best):
@@ -220,76 +218,7 @@ summary = {'step': 'C', 'r9p_sha256': sha(best), 'r9p_dev_quick_adaptive_hybrid'
 json.dump(summary, open(f'{PUB}/C_summary.json', 'w'), indent=1)
 print(json.dumps(summary, indent=1))
 print('C DONE')
-'''
-C = [code(COMMON + R8P + C_DATA), code(C_TRAIN), code(C_END)]
-
-# Step C away from Kaggle (Colab, or any CUDA machine with KIN_R9P set): the same data and training cells; inputs come
-# from one private folder and outputs and resumable checkpoints go back to it, so a dropped session continues.
-COLAB = '''import os, glob, json, hashlib, shutil, subprocess
-# Put two private files in IN (never in git):
-#   best.pt                  v10-r8p, SHA-256 38c289d3... (Kaggle notebook99ae0586bd output, or best.zip on the Mac)
-#   real_questions_full.tgz  the file in the private Kaggle dataset kinthread-real-questions
-IN = os.environ.get('KIN_R9P', '/content/drive/MyDrive/kinthread_r9p')
-if IN.startswith('/content/drive/') and not os.path.isdir('/content/drive/MyDrive'):
-    from google.colab import drive
-    drive.mount('/content/drive')
-W = IN
-PUB, PRIV = f'{W}/public', f'{W}/private'   # public: counts only, safe to commit; private: real question text, never commit
-os.makedirs(PUB, exist_ok=True)
-os.makedirs(PRIV, exist_ok=True)
-TMP = os.environ.get('KIN_TMP', '/content/temp' if os.path.isdir('/content') else '/tmp/kinthread-r9p')
-REPO, BRANCH = f'{TMP}/Kinthread-llm-model', 'main'
-R8P_SHA = '38c289d351d6517b5cde1bc9fb64ea97bd33eee193639d6351edda52fdfd7a52'
-
-
-def sh(cmd):
-    print('$', cmd, flush=True)
-    if subprocess.run(cmd, shell=True).returncode:
-        raise SystemExit(f'STOP: command failed: {cmd}')
-
-
-def stop(msg):
-    raise SystemExit('STOP: ' + msg)
-
-
-def sha(path):
-    h = hashlib.sha256()
-    with open(path, 'rb') as f:
-        for block in iter(lambda: f.read(1 << 20), b''):
-            h.update(block)
-    return h.hexdigest()
-
-
-import torch
-if not torch.cuda.is_available():
-    stop('no GPU (Colab: Runtime > Change runtime type > T4 GPU)')
-for name in ('best.pt', 'real_questions_full.tgz'):
-    if not os.path.exists(f'{IN}/{name}'):
-        stop(f'put {name} in {IN}')
-os.makedirs(TMP, exist_ok=True)
-if not os.path.exists(REPO):
-    sh(f'git clone --depth 1 -b {BRANCH} https://github.com/ArAnirudh2901/Kinthread-llm-model.git {REPO}')
-os.chdir(REPO)
-sh(f'rm -rf data/real_questions && tar -xzf {IN}/real_questions_full.tgz')
-if not glob.glob('data/real_questions/*.jsonl'):
-    stop('no real question files after unpacking real_questions_full.tgz')
-os.makedirs('runs/v10-r8p-final', exist_ok=True)
-if not os.path.exists('runs/v10-r8p-final/best.pt'):
-    if sha(f'{IN}/best.pt') != R8P_SHA:
-        stop(f'{IN}/best.pt is not v10-r8p (SHA-256 {R8P_SHA})')
-    shutil.copy(f'{IN}/best.pt', 'runs/v10-r8p-final/best.pt')
-print('repo, real questions and r8p checkpoint ready on', torch.cuda.get_device_name(0))
-'''
-C_COLAB = [code(COLAB + C_DATA.replace("S = '/kaggle/temp/share'", "S = f'{TMP}/share'")), code(C_TRAIN), code(C_END)]
-
-
-def write_colab(name, title, cells):
-    nb = {'cells': [md(title)] + cells, 'metadata': {'kernelspec': {'display_name': 'Python 3', 'language': 'python', 'name': 'python3'},
-          'language_info': {'name': 'python'}, 'accelerator': 'GPU'}, 'nbformat': 4, 'nbformat_minor': 5}
-    path = os.path.join(HERE, name)
-    with open(path, 'w') as f:
-        json.dump(nb, f, indent=1)
-    return path
+''')]
 
 D = [code(COMMON + '''
 R9P = one('runs/v10-r9p/best.pt', 'the output of kinthread-r9p-c-train')
@@ -353,10 +282,5 @@ if __name__ == '__main__':
               [f"{USER}/{SLUG[k]}" for k in ('A', 'B1', 'C', 'B2')]),
         write('E', '# r9p step E: locked test, once, only with the owner approval\nAbout 1-2 h.', E,
               [f"{USER}/{SLUG[k]}" for k in ('C', 'D')]),
-        write_colab('C_train_colab.ipynb', '# r9p step C on Colab or any CUDA machine: train r9p from r8p\n'
-                    'Same data and training as `C_train` (Kaggle). First put `best.pt` (v10-r8p) and '
-                    '`real_questions_full.tgz` in `MyDrive/kinthread_r9p` (or set `KIN_R9P`). Checkpoints and results are '
-                    'written there; if the session drops, run all cells again and training resumes. About 3-6 h on a T4.',
-                    C_COLAB),
     ]
     print('\n'.join(out))

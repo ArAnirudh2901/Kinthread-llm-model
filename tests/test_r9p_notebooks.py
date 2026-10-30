@@ -10,7 +10,7 @@ pyflakes_api = pytest.importorskip('pyflakes.api')
 from pyflakes.messages import UndefinedName  # noqa: E402
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-NOTEBOOKS = sorted(glob.glob(os.path.join(HERE, 'colab/r9p/*/notebook.ipynb')) + glob.glob(os.path.join(HERE, 'colab/r9p/*.ipynb')))
+NOTEBOOKS = sorted(glob.glob(os.path.join(HERE, 'colab/r9p/*/notebook.ipynb')))
 
 
 class Collect:
@@ -28,7 +28,7 @@ class Collect:
 
 
 def test_r9p_notebooks_exist():
-    assert len(NOTEBOOKS) >= 7
+    assert len(NOTEBOOKS) == 6
 
 
 @pytest.mark.parametrize('path', NOTEBOOKS, ids=lambda p: os.path.relpath(p, HERE))
