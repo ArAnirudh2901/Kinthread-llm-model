@@ -261,3 +261,41 @@ All work is on `main` in Kinthread-llm-model, Kinthread and LLM-From-Scratch. `v
 `kinship-qa-web` were merged (each fully contained in `main`) and are deleted on GitHub. LLM-From-Scratch
 `2_Training_Tiny_LLM` was synced from this repo (60 files, none diverged). Notebooks and the r9p run-book clone `main`.
 The answer-option tests now state the gender they need, so they pass without the name table.
+
+## 2026-10-29 — r9p run stopped at step A
+
+Pulled `origin/main`; local `HEAD` matched `2f7055e576ad4f40d89e164eb76b58e787786c35`. Uploaded the evaluation
+archive, selected `FINAL.json`/`verifier.json`, and the SHA-matched r8p checkpoint to the private Kaggle dataset
+`aranirudh/kinthread-real-questions`. Pushed step A as `aranirudh/kinthread-r9p-a-baseline`; Kaggle ended it with
+`KernelWorkerStatus.ERROR`. The kernel log reports `NameError: name 'REPO' is not defined` in `In [1]`. Per the
+run-book, stopped the run without retrying or changing notebook/runner code. No metrics or training checkpoint were
+produced; no `results/r9p/A/` output, commit, or push was made. The A kernel metadata account/dataset references
+were updated locally for this attempt and remain uncommitted.
+
+### r9p run report (stopped)
+
+| Measure | r8p | r9p |
+| --- | --- | --- |
+| Real dev fair, FINAL setting | Not run (A failed) | Not run |
+| Gain (points), wins / losses, McNemar p | — | Not run |
+| Dev fair with 192-token reading | Not run | Not run |
+| Gauntlet correct | Not run | Not run |
+| Consistency, all variants agree | Not run | Not run |
+| Locked test fair / verified | 68.8% / 72.2% (scored 2026-10-26) | Not run |
+
+- Flags adopted in step A: not run
+- Step D decision: not run
+- r9p checkpoint SHA-256: not produced
+- Largest exam-pattern gaps (A): not available
+- Most missed patterns (A): not available
+- Problems: step A — `KernelWorkerStatus.ERROR`; `NameError: name 'REPO' is not defined` in `In [1]`.
+
+## 2026-10-30 — r9p notebooks fixed, steps A and C started
+
+The `NameError` came from a truncated line in `colab/r9p/build_notebooks.py` (`REPO, X`; `BRANCH` was never defined),
+shared by all six notebooks. Fixed (`REPO, BRANCH = '/kaggle/temp/Kinthread-llm-model', 'main'`), notebooks regenerated,
+every notebook's code checked with pyflakes (no undefined names). The pipeline now runs under the owner's Kaggle account
+`aranirudh`: the r8p and final-selection notebooks belong to `anirudharavalli` and cannot be attached there, so the private
+dataset `aranirudh/kinthread-real-questions` holds `real_questions_full.tgz`, the SHA-checked r8p `best.pt`, `FINAL.json`
+and `verifier.json`; steps A, B1 and C attach only that dataset. Steps A and C (training) were pushed at the same time (C
+does not use A's output); then B1, B2, D. Locked test (E) only after "approve locked".

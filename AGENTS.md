@@ -124,3 +124,5 @@ any changed data from LLM-From-Scratch, regenerate `data/SHA256SUMS` if data cha
   locked 68.8% unchanged. Copy `eval/web_input_set.py` to LLM-From-Scratch. Checkpoint unchanged; nothing deployed.
 - 2026-10-29 (branches): everything is on `main` (v9-reader, the r9p work and the website input-comparison set merged); every
   notebook and the r9p run-book clone `main`. The other branches are merged and can be deleted.
+- 2026-10-29 (r9p run): pulled latest `main`, uploaded the needed files to private Kaggle dataset `aranirudh/kinthread-real-questions`, and pushed step A. Stopped on Kaggle `KernelWorkerStatus.ERROR`: `NameError: name 'REPO' is not defined` in `In [1]`. No training, metrics, commit, or push; details in HANDOFF.md.
+- 2026-10-30 (r9p): fixed the truncated `REPO` line in `colab/r9p/build_notebooks.py`; Kaggle account `aranirudh` (dataset holds r8p best.pt, FINAL.json, verifier.json); steps A and C started.
