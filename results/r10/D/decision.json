@@ -1,0 +1,52 @@
+{
+ "step": "D",
+ "adopt": false,
+ "config": "final",
+ "extra_flags": "",
+ "dev": {
+  "split": "dev",
+  "old_fair": "528/714 = 73.9%",
+  "new_fair": "521/714 = 73.0%",
+  "gain_points": -0.98,
+  "wins": 10,
+  "losses": 17,
+  "p": 0.2478,
+  "adopt": false,
+  "rule": "gain >= 2.0 points, wins > losses, McNemar p < 0.05"
+ },
+ "all_configs": {
+  "final": {
+   "split": "dev",
+   "old_fair": "528/714 = 73.9%",
+   "new_fair": "521/714 = 73.0%",
+   "gain_points": -0.98,
+   "wins": 10,
+   "losses": 17,
+   "p": 0.2478,
+   "adopt": false,
+   "rule": "gain >= 2.0 points, wins > losses, McNemar p < 0.05"
+  },
+  "final_correct": {
+   "split": "dev",
+   "old_fair": "528/714 = 73.9%",
+   "new_fair": "521/714 = 73.0%",
+   "gain_points": -0.98,
+   "wins": 11,
+   "losses": 18,
+   "p": 0.2649,
+   "adopt": false,
+   "rule": "gain >= 2.0 points, wins > losses, McNemar p < 0.05"
+  }
+ },
+ "gauntlet": {
+  "r8p": 0.9495,
+  "r10": 0.964
+ },
+ "consistency_all_agree": {
+  "r8p": 0.94,
+  "r10": 0.9833
+ },
+ "suites_not_worse": true,
+ "r10_sha256": "e60625771b6d1323489d56121f628acb416d44dbf367b28309e6f1a000de9105",
+ "rule": "adopt = dev fair gain >= 2 points, wins > losses, McNemar p < 0.05, gauntlet and consistency not lower by more than 1 point"
+}

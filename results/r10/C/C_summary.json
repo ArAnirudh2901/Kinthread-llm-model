@@ -1,0 +1,16 @@
+{
+ "step": "C",
+ "r10_sha256": "e60625771b6d1323489d56121f628acb416d44dbf367b28309e6f1a000de9105",
+ "correction_rows": 5224,
+ "r10_dev_quick_adaptive_hybrid": {
+  "dev": "533/748 = 71.3%",
+  "dev fair": "521/714 = 73.0%",
+  "dev verified": "498/650 = 76.6%"
+ },
+ "r10_dev_quick_correct": {
+  "dev": "533/748 = 71.3%",
+  "dev fair": "520/714 = 72.8%",
+  "dev verified": "498/650 = 76.6%"
+ },
+ "r9p_same_setting": "520/714 = 72.8% fair (results/r9p/C)"
+}
