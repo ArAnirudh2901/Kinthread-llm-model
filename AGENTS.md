@@ -126,3 +126,4 @@ any changed data from LLM-From-Scratch, regenerate `data/SHA256SUMS` if data cha
   notebook and the r9p run-book clone `main`. The other branches are merged and can be deleted.
 - 2026-10-29 (r9p run): pulled latest `main`, uploaded the needed files to private Kaggle dataset `aranirudh/kinthread-real-questions`, and pushed step A. Stopped on Kaggle `KernelWorkerStatus.ERROR`: `NameError: name 'REPO' is not defined` in `In [1]`. No training, metrics, commit, or push; details in HANDOFF.md.
 - 2026-10-30 (r9p): fixed the truncated `REPO` line in `colab/r9p/build_notebooks.py`; Kaggle account `aranirudh` (dataset holds r8p best.pt, FINAL.json, verifier.json); steps A and C started.
+- 2026-10-31 (r9p run): step D kept r8p; dev fair 73.9% -> 73.5% (13 wins / 16 losses, p=0.71); gauntlet 0.950 -> 0.962, consistency 0.940 -> 0.987; locked not run. Results in results/r9p/.

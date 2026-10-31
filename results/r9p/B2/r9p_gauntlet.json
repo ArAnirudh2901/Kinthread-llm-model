@@ -1,0 +1,157 @@
+{
+ "reader": "model",
+ "questions": 1168,
+ "correct": 0.9615,
+ "by category": {
+  "generations 3-5": {
+   "n": 60,
+   "correct": 1.0,
+   "twin same answer": 1.0
+  },
+  "generations 6-10": {
+   "n": 60,
+   "correct": 0.9833,
+   "twin same answer": 0.9821
+  },
+  "cousins deep": {
+   "n": 60,
+   "correct": 0.9833,
+   "twin same answer": 1.0
+  },
+  "detour 1": {
+   "n": 60,
+   "correct": 0.9833,
+   "twin same answer": 1.0
+  },
+  "detour 2": {
+   "n": 60,
+   "correct": 1.0,
+   "twin same answer": 1.0
+  },
+  "detour 3": {
+   "n": 60,
+   "correct": 1.0,
+   "twin same answer": 1.0
+  },
+  "direct speech": {
+   "n": 60,
+   "correct": 1.0,
+   "twin same answer": 1.0
+  },
+  "indirect speech": {
+   "n": 60,
+   "correct": 1.0,
+   "twin same answer": 1.0
+  },
+  "introduction": {
+   "n": 60,
+   "correct": 1.0,
+   "twin same answer": 1.0
+  },
+  "identity": {
+   "n": 60,
+   "correct": 1.0,
+   "twin same answer": 1.0
+  },
+  "nested": {
+   "n": 60,
+   "correct": 1.0,
+   "twin same answer": 1.0
+  },
+  "statements": {
+   "n": 60,
+   "correct": 1.0,
+   "twin same answer": 1.0
+  },
+  "deep chain": {
+   "n": 60,
+   "correct": 1.0,
+   "twin same answer": 0.9783
+  },
+  "coded": {
+   "n": 60,
+   "correct": 1.0,
+   "twin same answer": 1.0
+  },
+  "puzzle": {
+   "n": 60,
+   "correct": 0.6667,
+   "twin same answer": 1.0
+  },
+  "sufficiency": {
+   "n": 60,
+   "correct": 0.9333,
+   "twin same answer": 0.9811
+  },
+  "claims": {
+   "n": 60,
+   "correct": 0.7333,
+   "twin same answer": 1.0
+  },
+  "long story": {
+   "n": 60,
+   "correct": 1.0,
+   "twin same answer": 1.0
+  },
+  "two families": {
+   "n": 60,
+   "correct": 1.0,
+   "twin same answer": 1.0
+  },
+  "twisted speech": {
+   "n": 6,
+   "correct": 1.0,
+   "twin same answer": null
+  },
+  "twisted generations": {
+   "n": 3,
+   "correct": 1.0,
+   "twin same answer": null
+  },
+  "twisted statements": {
+   "n": 6,
+   "correct": 0.8333,
+   "twin same answer": null
+  },
+  "twisted coded": {
+   "n": 1,
+   "correct": 1.0,
+   "twin same answer": null
+  },
+  "twisted hindi": {
+   "n": 1,
+   "correct": 1.0,
+   "twin same answer": null
+  },
+  "twisted story": {
+   "n": 1,
+   "correct": 1.0,
+   "twin same answer": null
+  },
+  "twisted sufficiency": {
+   "n": 2,
+   "correct": 1.0,
+   "twin same answer": null
+  },
+  "twisted puzzle": {
+   "n": 1,
+   "correct": 1.0,
+   "twin same answer": null
+  },
+  "twisted claims": {
+   "n": 1,
+   "correct": 1.0,
+   "twin same answer": null
+  },
+  "twisted detour": {
+   "n": 3,
+   "correct": 0.6667,
+   "twin same answer": null
+  },
+  "twisted nested": {
+   "n": 3,
+   "correct": 1.0,
+   "twin same answer": null
+  }
+ }
+}

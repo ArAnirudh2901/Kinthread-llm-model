@@ -299,3 +299,26 @@ every notebook's code checked with pyflakes (no undefined names). The pipeline n
 dataset `aranirudh/kinthread-real-questions` holds `real_questions_full.tgz`, the SHA-checked r8p `best.pt`, `FINAL.json`
 and `verifier.json`; steps A, B1 and C attach only that dataset. Steps A and C (training) were pushed at the same time (C
 does not use A's output); then B1, B2, D. Locked test (E) only after "approve locked".
+
+## r9p run (2026-10-31)
+
+| Measure | r8p | r9p |
+| --- | --- | --- |
+| Real dev fair, FINAL setting | 528/714 = 73.9% | 525/714 = 73.5% |
+| Gain (points), wins / losses, McNemar p | | -0.42, 13 / 16, p=0.71 |
+| Dev fair with 192-token reading | 527/714 = 73.8% | 525/714 = 73.5% (config final_plus; 12 / 15, p=0.70) |
+| Gauntlet correct | 0.9495 | 0.9615 |
+| Consistency, all variants agree | 0.9400 | 0.9867 |
+| Locked test fair / verified | 68.8% / 72.2% (scored 2026-10-26) | not run |
+
+- Flags adopted in step A: none
+- Step D decision: adopt false (kept r8p), config final, extra flags none
+- r9p checkpoint SHA-256: 2aa1474a75a2acad6e852b1d9c2e89fa9041e81b76f420ef07969e3061c3b68b
+- Largest exam-pattern gaps (A): options <= 4 (real 66.8%, generated 16.4%); "how is X related to Y" (58.2% vs 24.4%);
+  kin word brother (48.1% vs 16.8%); single letters as names, 3+ (57.1% vs 26.3%); "only" (33.6% vs 9.1%)
+- Most missed patterns (A): single letters as names, 3+ (117 missed, 73%); father (113, 73%); options <= 4 (110, 78%);
+  son (102, 74%); daughter (102, 68%)
+- Problems: the first C run used pre-review code (fp16-overflow crash risk) and was deleted and restarted once; A took
+  6.5 h (trace + shadow), so B1/B2/D now run their two jobs on both T4s at once (`par()` in `build_notebooks.py`).
+- Reading: r9p is more robust to rewording (consistency +4.7 points, gauntlet +1.2) but not more accurate on real dev.
+  The added balanced / detour data taught invariance, not new real wording. Next ideas: `RESEARCH.md` 2026-10-31.

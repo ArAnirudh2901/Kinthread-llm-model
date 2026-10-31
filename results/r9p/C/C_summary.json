@@ -1,0 +1,10 @@
+{
+ "step": "C",
+ "r9p_sha256": "2aa1474a75a2acad6e852b1d9c2e89fa9041e81b76f420ef07969e3061c3b68b",
+ "r9p_dev_quick_adaptive_hybrid": {
+  "dev": "534/748 = 71.4%",
+  "dev fair": "520/714 = 72.8%",
+  "dev verified": "495/650 = 76.2%"
+ },
+ "r8p_dev_same_setting": "see colab/r8p_kaggle.ipynb output (dev, --adaptive 1.0 --hybrid)"
+}

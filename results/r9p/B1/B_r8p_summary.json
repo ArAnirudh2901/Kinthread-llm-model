@@ -1,0 +1,70 @@
+{
+ "step": "B-r8p",
+ "checkpoint_sha256": "38c289d351d6517b5cde1bc9fb64ea97bd33eee193639d6351edda52fdfd7a52",
+ "gauntlet_correct": 0.9495,
+ "gauntlet_by_category": {
+  "generations 3-5": 0.9833,
+  "generations 6-10": 0.9333,
+  "cousins deep": 0.9333,
+  "detour 1": 1.0,
+  "detour 2": 0.95,
+  "detour 3": 0.9333,
+  "direct speech": 1.0,
+  "indirect speech": 1.0,
+  "introduction": 1.0,
+  "identity": 1.0,
+  "nested": 1.0,
+  "statements": 1.0,
+  "deep chain": 1.0,
+  "coded": 1.0,
+  "puzzle": 0.6333,
+  "sufficiency": 0.9667,
+  "claims": 0.7333,
+  "long story": 1.0,
+  "two families": 1.0,
+  "twisted speech": 1.0,
+  "twisted generations": 1.0,
+  "twisted statements": 0.8333,
+  "twisted coded": 1.0,
+  "twisted hindi": 1.0,
+  "twisted story": 1.0,
+  "twisted sufficiency": 0.5,
+  "twisted puzzle": 1.0,
+  "twisted claims": 1.0,
+  "twisted detour": 0.6667,
+  "twisted nested": 1.0
+ },
+ "consistency_all_agree": 0.94,
+ "consistency_by_transform": {
+  "base": {
+   "n": 300,
+   "same as base": 1.0,
+   "correct": 0.9583
+  },
+  "detour 1": {
+   "n": 150,
+   "same as base": 0.9133,
+   "correct": 0.9533
+  },
+  "detour 2": {
+   "n": 150,
+   "same as base": 0.9267,
+   "correct": 0.96
+  },
+  "rename": {
+   "n": 258,
+   "same as base": 1.0,
+   "correct": 0.9621
+  },
+  "options": {
+   "n": 55,
+   "same as base": 0.9455,
+   "correct": 1.0
+  },
+  "reorder": {
+   "n": 9,
+   "same as base": 0.8889,
+   "correct": 0.8889
+  }
+ }
+}

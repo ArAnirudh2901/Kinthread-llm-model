@@ -1,0 +1,2712 @@
+{
+ "real_questions": 748,
+ "generated_rows": 30000,
+ "features": {
+  "answer": {
+   "brother": {
+    "real": 0.0455,
+    "real_n": 34,
+    "gen": 0.0228,
+    "gen/real": 0.5,
+    "model_acc": 0.912,
+    "missed": 3
+   },
+   "sister": {
+    "real": 0.0361,
+    "real_n": 27,
+    "gen": 0.0202,
+    "gen/real": 0.56,
+    "model_acc": 0.741,
+    "missed": 7
+   },
+   "mother": {
+    "real": 0.0361,
+    "real_n": 27,
+    "gen": 0.0263,
+    "gen/real": 0.73,
+    "model_acc": 0.815,
+    "missed": 5
+   },
+   "grandson": {
+    "real": 0.0361,
+    "real_n": 27,
+    "gen": 0.0205,
+    "gen/real": 0.57,
+    "model_acc": 0.926,
+    "missed": 2
+   },
+   "uncle": {
+    "real": 0.0334,
+    "real_n": 25,
+    "gen": 0.0001,
+    "gen/real": 0.0,
+    "model_acc": 0.68,
+    "missed": 8
+   },
+   "son": {
+    "real": 0.0334,
+    "real_n": 25,
+    "gen": 0.0281,
+    "gen/real": 0.84,
+    "model_acc": 0.84,
+    "missed": 4
+   },
+   "aunt": {
+    "real": 0.0321,
+    "real_n": 24,
+    "gen": 0.0002,
+    "gen/real": 0.01,
+    "model_acc": 0.833,
+    "missed": 4
+   },
+   "father": {
+    "real": 0.0294,
+    "real_n": 22,
+    "gen": 0.0231,
+    "gen/real": 0.79,
+    "model_acc": 0.909,
+    "missed": 2
+   },
+   "cousin": {
+    "real": 0.0267,
+    "real_n": 20,
+    "gen": 0.0001,
+    "gen/real": 0.0,
+    "model_acc": 0.8,
+    "missed": 4
+   },
+   "none of these": {
+    "real": 0.0241,
+    "real_n": 18,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.833,
+    "missed": 3
+   },
+   "cannot be determined": {
+    "real": 0.0241,
+    "real_n": 18,
+    "gen": 0.0005,
+    "gen/real": 0.02,
+    "model_acc": 0.778,
+    "missed": 4
+   },
+   "wife": {
+    "real": 0.0214,
+    "real_n": 16,
+    "gen": 0.0176,
+    "gen/real": 0.82,
+    "model_acc": 0.875,
+    "missed": 2
+   },
+   "daughter": {
+    "real": 0.0201,
+    "real_n": 15,
+    "gen": 0.0204,
+    "gen/real": 1.01,
+    "model_acc": 0.867,
+    "missed": 2
+   },
+   "brother-in-law": {
+    "real": 0.0201,
+    "real_n": 15,
+    "gen": 0.0282,
+    "gen/real": 1.4,
+    "model_acc": 0.867,
+    "missed": 2
+   },
+   "nephew": {
+    "real": 0.0174,
+    "real_n": 13,
+    "gen": 0.0149,
+    "gen/real": 0.86,
+    "model_acc": 0.538,
+    "missed": 6
+   },
+   "father-in-law": {
+    "real": 0.0174,
+    "real_n": 13,
+    "gen": 0.025,
+    "gen/real": 1.44,
+    "model_acc": 0.923,
+    "missed": 1
+   },
+   "niece": {
+    "real": 0.016,
+    "real_n": 12,
+    "gen": 0.0148,
+    "gen/real": 0.93,
+    "model_acc": 0.667,
+    "missed": 4
+   },
+   "mother-in-law": {
+    "real": 0.0134,
+    "real_n": 10,
+    "gen": 0.0259,
+    "gen/real": 1.93,
+    "model_acc": 0.8,
+    "missed": 2
+   },
+   "sister-in-law": {
+    "real": 0.0134,
+    "real_n": 10,
+    "gen": 0.0263,
+    "gen/real": 1.96,
+    "model_acc": 0.5,
+    "missed": 5
+   },
+   "daughter-in-law": {
+    "real": 0.012,
+    "real_n": 9,
+    "gen": 0.0253,
+    "gen/real": 2.11,
+    "model_acc": 0.667,
+    "missed": 3
+   },
+   "granddaughter": {
+    "real": 0.0107,
+    "real_n": 8,
+    "gen": 0.0151,
+    "gen/real": 1.41,
+    "model_acc": 0.875,
+    "missed": 1
+   },
+   "husband": {
+    "real": 0.0107,
+    "real_n": 8,
+    "gen": 0.0165,
+    "gen/real": 1.54,
+    "model_acc": 0.875,
+    "missed": 1
+   },
+   "grandfather": {
+    "real": 0.0107,
+    "real_n": 8,
+    "gen": 0.0001,
+    "gen/real": 0.01,
+    "model_acc": 0.875,
+    "missed": 1
+   },
+   "maternal uncle": {
+    "real": 0.0107,
+    "real_n": 8,
+    "gen": 0.011,
+    "gen/real": 1.03,
+    "model_acc": 0.75,
+    "missed": 2
+   },
+   "four": {
+    "real": 0.0094,
+    "real_n": 7,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.429,
+    "missed": 4
+   },
+   "son-in-law": {
+    "real": 0.0094,
+    "real_n": 7,
+    "gen": 0.025,
+    "gen/real": 2.66,
+    "model_acc": 0.714,
+    "missed": 2
+   },
+   "( d ) mother": {
+    "real": 0.0094,
+    "real_n": 7,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 1.0,
+    "missed": 0
+   },
+   "data inadequate": {
+    "real": 0.008,
+    "real_n": 6,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.5,
+    "missed": 3
+   },
+   "his son": {
+    "real": 0.008,
+    "real_n": 6,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.833,
+    "missed": 1
+   },
+   "grandmother": {
+    "real": 0.008,
+    "real_n": 6,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.833,
+    "missed": 1
+   },
+   "a": {
+    "real": 0.008,
+    "real_n": 6,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.5,
+    "missed": 3
+   },
+   "( b ) mother": {
+    "real": 0.0067,
+    "real_n": 5,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 1.0,
+    "missed": 0
+   },
+   "cousin sister": {
+    "real": 0.0053,
+    "real_n": 4,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.5,
+    "missed": 2
+   },
+   "m x n - c + f": {
+    "real": 0.004,
+    "real_n": 3,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.667,
+    "missed": 1
+   },
+   "self": {
+    "real": 0.004,
+    "real_n": 3,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.333,
+    "missed": 2
+   },
+   "none of the above": {
+    "real": 0.004,
+    "real_n": 3,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.667,
+    "missed": 1
+   },
+   "three": {
+    "real": 0.004,
+    "real_n": 3,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.333,
+    "missed": 2
+   },
+   "sister of father-in-law": {
+    "real": 0.004,
+    "real_n": 3,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 1.0,
+    "missed": 0
+   },
+   "mother's mother": {
+    "real": 0.004,
+    "real_n": 3,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.667,
+    "missed": 1
+   },
+   "s": {
+    "real": 0.004,
+    "real_n": 3,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.0,
+    "missed": 3
+   },
+   "( b ) sister": {
+    "real": 0.004,
+    "real_n": 3,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 1.0,
+    "missed": 0
+   },
+   "maternal aunt": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0089,
+    "gen/real": 3.3,
+    "model_acc": 0.5,
+    "missed": 1
+   },
+   "k is the paternal uncle of s.": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.0,
+    "missed": 2
+   },
+   "b": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 1.0,
+    "missed": 0
+   },
+   "c": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 1.0,
+    "missed": 0
+   },
+   "m + k \u00f7 t x p": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.0,
+    "missed": 2
+   },
+   "p \u2013 q + r": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.5,
+    "missed": 1
+   },
+   "r is the mother of p": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.5,
+    "missed": 1
+   },
+   "q is wife of n": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.0,
+    "missed": 2
+   },
+   "j": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.0,
+    "missed": 2
+   },
+   "t is the wife of q": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 1.0,
+    "missed": 0
+   },
+   "great grand daughter": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 1.0,
+    "missed": 0
+   },
+   "lakshmi": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.0,
+    "missed": 2
+   },
+   "lawyer": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0003,
+    "gen/real": 0.11,
+    "model_acc": 0.0,
+    "missed": 2
+   },
+   "two": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0001,
+    "gen/real": 0.04,
+    "model_acc": 0.5,
+    "missed": 1
+   },
+   "brother in law": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 1.0,
+    "missed": 0
+   },
+   "can have his uncler from any class": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.0,
+    "missed": 2
+   },
+   "grandfather born in class a": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.5,
+    "missed": 1
+   },
+   "q": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0001,
+    "gen/real": 0.04,
+    "model_acc": 1.0,
+    "missed": 0
+   },
+   "p is the aunt of q": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.5,
+    "missed": 1
+   }
+  },
+  "coded": {
+   "4 symbols": {
+    "real": 0.0909,
+    "real_n": 68,
+    "gen": 0.0172,
+    "gen/real": 0.19,
+    "model_acc": 0.824,
+    "missed": 12
+   },
+   "expression with 1 operators": {
+    "real": 0.0842,
+    "real_n": 63,
+    "gen": 0.0278,
+    "gen/real": 0.33,
+    "model_acc": 0.714,
+    "missed": 18
+   },
+   "3 symbols": {
+    "real": 0.0695,
+    "real_n": 52,
+    "gen": 0.0286,
+    "gen/real": 0.41,
+    "model_acc": 0.827,
+    "missed": 9
+   },
+   "expression with 3 operators": {
+    "real": 0.0441,
+    "real_n": 33,
+    "gen": 0.0183,
+    "gen/real": 0.41,
+    "model_acc": 0.697,
+    "missed": 10
+   },
+   "2 symbols": {
+    "real": 0.0374,
+    "real_n": 28,
+    "gen": 0.031,
+    "gen/real": 0.83,
+    "model_acc": 0.75,
+    "missed": 7
+   },
+   "expression with 2 operators": {
+    "real": 0.0321,
+    "real_n": 24,
+    "gen": 0.0434,
+    "gen/real": 1.35,
+    "model_acc": 0.75,
+    "missed": 6
+   },
+   "expression with 5 operators": {
+    "real": 0.0321,
+    "real_n": 24,
+    "gen": 0.0089,
+    "gen/real": 0.28,
+    "model_acc": 0.875,
+    "missed": 3
+   },
+   "5 symbols": {
+    "real": 0.0294,
+    "real_n": 22,
+    "gen": 0.015,
+    "gen/real": 0.51,
+    "model_acc": 0.636,
+    "missed": 8
+   },
+   "expression with 4 operators": {
+    "real": 0.0214,
+    "real_n": 16,
+    "gen": 0.0132,
+    "gen/real": 0.62,
+    "model_acc": 0.938,
+    "missed": 1
+   },
+   "expression with 6 operators": {
+    "real": 0.0187,
+    "real_n": 14,
+    "gen": 0.0054,
+    "gen/real": 0.29,
+    "model_acc": 1.0,
+    "missed": 0
+   },
+   "1 symbols": {
+    "real": 0.0067,
+    "real_n": 5,
+    "gen": 0.0224,
+    "gen/real": 3.34,
+    "model_acc": 0.6,
+    "missed": 2
+   },
+   "6 symbols": {
+    "real": 0.0067,
+    "real_n": 5,
+    "gen": 0.0119,
+    "gen/real": 1.78,
+    "model_acc": 0.6,
+    "missed": 2
+   },
+   "expression with 7 operators": {
+    "real": 0.0053,
+    "real_n": 4,
+    "gen": 0.0045,
+    "gen/real": 0.85,
+    "model_acc": 0.75,
+    "missed": 1
+   },
+   "no expression": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0028,
+    "gen/real": 1.04,
+    "model_acc": 0.5,
+    "missed": 1
+   },
+   "expression with 11 operators": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0007,
+    "gen/real": null
+   },
+   "expression with 12 operators": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0005,
+    "gen/real": null
+   },
+   "expression with 10 operators": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0009,
+    "gen/real": null
+   },
+   "expression with 9 operators": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0017,
+    "gen/real": null
+   },
+   "7 symbols": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0042,
+    "gen/real": null
+   },
+   "expression with 8 operators": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0021,
+    "gen/real": null
+   }
+  },
+  "construction": {
+   "single letters as names (3+)": {
+    "real": 0.5709,
+    "real_n": 427,
+    "gen": 0.2756,
+    "gen/real": 0.48,
+    "model_acc": 0.726,
+    "missed": 117
+   },
+   "first person (my / I / me)": {
+    "real": 0.4144,
+    "real_n": 310,
+    "gen": 0.2345,
+    "gen/real": 0.57,
+    "model_acc": 0.735,
+    "missed": 82
+   },
+   "only": {
+    "real": 0.3356,
+    "real_n": 251,
+    "gen": 0.2737,
+    "gen/real": 0.82,
+    "model_acc": 0.729,
+    "missed": 68
+   },
+   "pronoun he / she / his / her": {
+    "real": 0.254,
+    "real_n": 190,
+    "gen": 0.3214,
+    "gen/real": 1.27,
+    "model_acc": 0.726,
+    "missed": 52
+   },
+   "great- / grand- relations": {
+    "real": 0.2433,
+    "real_n": 182,
+    "gen": 0.2108,
+    "gen/real": 0.87,
+    "model_acc": 0.676,
+    "missed": 59
+   },
+   "married / unmarried / bachelor": {
+    "real": 0.1965,
+    "real_n": 147,
+    "gen": 0.0993,
+    "gen/real": 0.51,
+    "model_acc": 0.619,
+    "missed": 56
+   },
+   "negation (not / no / neither)": {
+    "real": 0.1618,
+    "real_n": 121,
+    "gen": 0.1209,
+    "gen/real": 0.75,
+    "model_acc": 0.603,
+    "missed": 48
+   },
+   "paternal / maternal side": {
+    "real": 0.0816,
+    "real_n": 61,
+    "gen": 0.0536,
+    "gen/real": 0.66,
+    "model_acc": 0.607,
+    "missed": 24
+   },
+   "of chain (the R of the R of)": {
+    "real": 0.0789,
+    "real_n": 59,
+    "gen": 0.0933,
+    "gen/real": 1.18,
+    "model_acc": 0.678,
+    "missed": 19
+   },
+   "second person (your / you)": {
+    "real": 0.0281,
+    "real_n": 21,
+    "gen": 0.0226,
+    "gen/real": 0.8,
+    "model_acc": 0.667,
+    "missed": 7
+   },
+   "professions": {
+    "real": 0.0214,
+    "real_n": 16,
+    "gen": 0.0163,
+    "gen/real": 0.76,
+    "model_acc": 0.312,
+    "missed": 11
+   },
+   "elder / younger / twin": {
+    "real": 0.0187,
+    "real_n": 14,
+    "gen": 0.0471,
+    "gen/real": 2.52,
+    "model_acc": 0.357,
+    "missed": 9
+   },
+   "possessive chain (X's R's R)": {
+    "real": 0.0134,
+    "real_n": 10,
+    "gen": 0.053,
+    "gen/real": 3.96,
+    "model_acc": 0.6,
+    "missed": 4
+   },
+   "relative clause (who / whose / whom)": {
+    "real": 0.0094,
+    "real_n": 7,
+    "gen": 0.0023,
+    "gen/real": 0.24,
+    "model_acc": 0.286,
+    "missed": 5
+   },
+   "respectively / coordination": {
+    "real": 0.0053,
+    "real_n": 4,
+    "gen": 0.0142,
+    "gen/real": 2.68,
+    "model_acc": 0.25,
+    "missed": 3
+   },
+   "step / half / adopted / late": {
+    "real": 0.004,
+    "real_n": 3,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.333,
+    "missed": 2
+   },
+   "Hindi kin words": {
+    "real": 0.0013,
+    "real_n": 1,
+    "gen": 0.0012,
+    "gen/real": 0.92,
+    "model_acc": 0.0,
+    "missed": 1
+   },
+   "all lower case": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.1087,
+    "gen/real": null
+   }
+  },
+  "kin word": {
+   "father": {
+    "real": 0.5575,
+    "real_n": 417,
+    "gen": 0.427,
+    "gen/real": 0.77,
+    "model_acc": 0.729,
+    "missed": 113
+   },
+   "son": {
+    "real": 0.5147,
+    "real_n": 385,
+    "gen": 0.4078,
+    "gen/real": 0.79,
+    "model_acc": 0.735,
+    "missed": 102
+   },
+   "brother": {
+    "real": 0.4813,
+    "real_n": 360,
+    "gen": 0.2653,
+    "gen/real": 0.55,
+    "model_acc": 0.75,
+    "missed": 90
+   },
+   "mother": {
+    "real": 0.4612,
+    "real_n": 345,
+    "gen": 0.4132,
+    "gen/real": 0.9,
+    "model_acc": 0.719,
+    "missed": 97
+   },
+   "daughter": {
+    "real": 0.4251,
+    "real_n": 318,
+    "gen": 0.3935,
+    "gen/real": 0.93,
+    "model_acc": 0.679,
+    "missed": 102
+   },
+   "sister": {
+    "real": 0.3663,
+    "real_n": 274,
+    "gen": 0.2594,
+    "gen/real": 0.71,
+    "model_acc": 0.697,
+    "missed": 83
+   },
+   "wife": {
+    "real": 0.2326,
+    "real_n": 174,
+    "gen": 0.3283,
+    "gen/real": 1.41,
+    "model_acc": 0.764,
+    "missed": 41
+   },
+   "husband": {
+    "real": 0.1444,
+    "real_n": 108,
+    "gen": 0.3324,
+    "gen/real": 2.3,
+    "model_acc": 0.796,
+    "missed": 22
+   },
+   "grandfather": {
+    "real": 0.0976,
+    "real_n": 73,
+    "gen": 0.0577,
+    "gen/real": 0.59,
+    "model_acc": 0.616,
+    "missed": 28
+   },
+   "uncle": {
+    "real": 0.0949,
+    "real_n": 71,
+    "gen": 0.0457,
+    "gen/real": 0.48,
+    "model_acc": 0.606,
+    "missed": 28
+   },
+   "grandmother": {
+    "real": 0.0655,
+    "real_n": 49,
+    "gen": 0.0537,
+    "gen/real": 0.82,
+    "model_acc": 0.633,
+    "missed": 18
+   },
+   "grandson": {
+    "real": 0.0481,
+    "real_n": 36,
+    "gen": 0.0478,
+    "gen/real": 0.99,
+    "model_acc": 0.667,
+    "missed": 12
+   },
+   "mother-in-law": {
+    "real": 0.0468,
+    "real_n": 35,
+    "gen": 0.0754,
+    "gen/real": 1.61,
+    "model_acc": 0.514,
+    "missed": 17
+   },
+   "parent": {
+    "real": 0.0455,
+    "real_n": 34,
+    "gen": 0.0721,
+    "gen/real": 1.58,
+    "model_acc": 0.618,
+    "missed": 13
+   },
+   "daughter-in-law": {
+    "real": 0.0455,
+    "real_n": 34,
+    "gen": 0.0685,
+    "gen/real": 1.51,
+    "model_acc": 0.676,
+    "missed": 11
+   },
+   "brother-in-law": {
+    "real": 0.0455,
+    "real_n": 34,
+    "gen": 0.0756,
+    "gen/real": 1.66,
+    "model_acc": 0.5,
+    "missed": 17
+   },
+   "child": {
+    "real": 0.0428,
+    "real_n": 32,
+    "gen": 0.0208,
+    "gen/real": 0.49,
+    "model_acc": 0.562,
+    "missed": 14
+   },
+   "sibling": {
+    "real": 0.0401,
+    "real_n": 30,
+    "gen": 0.0223,
+    "gen/real": 0.56,
+    "model_acc": 0.767,
+    "missed": 7
+   },
+   "aunt": {
+    "real": 0.0374,
+    "real_n": 28,
+    "gen": 0.0377,
+    "gen/real": 1.01,
+    "model_acc": 0.643,
+    "missed": 10
+   },
+   "father-in-law": {
+    "real": 0.0374,
+    "real_n": 28,
+    "gen": 0.0733,
+    "gen/real": 1.96,
+    "model_acc": 0.75,
+    "missed": 7
+   },
+   "son-in-law": {
+    "real": 0.0374,
+    "real_n": 28,
+    "gen": 0.0612,
+    "gen/real": 1.64,
+    "model_acc": 0.714,
+    "missed": 8
+   },
+   "granddaughter": {
+    "real": 0.0361,
+    "real_n": 27,
+    "gen": 0.0469,
+    "gen/real": 1.3,
+    "model_acc": 0.778,
+    "missed": 6
+   },
+   "nephew": {
+    "real": 0.0348,
+    "real_n": 26,
+    "gen": 0.0303,
+    "gen/real": 0.87,
+    "model_acc": 0.538,
+    "missed": 12
+   },
+   "sister-in-law": {
+    "real": 0.0348,
+    "real_n": 26,
+    "gen": 0.0741,
+    "gen/real": 2.13,
+    "model_acc": 0.654,
+    "missed": 9
+   },
+   "niece": {
+    "real": 0.0281,
+    "real_n": 21,
+    "gen": 0.0308,
+    "gen/real": 1.1,
+    "model_acc": 0.524,
+    "missed": 10
+   },
+   "spouse": {
+    "real": 0.0214,
+    "real_n": 16,
+    "gen": 0.0147,
+    "gen/real": 0.69,
+    "model_acc": 0.812,
+    "missed": 3
+   },
+   "grandchild": {
+    "real": 0.0174,
+    "real_n": 13,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 1.0,
+    "missed": 0
+   },
+   "cousin": {
+    "real": 0.0107,
+    "real_n": 8,
+    "gen": 0.0263,
+    "gen/real": 2.46,
+    "model_acc": 0.5,
+    "missed": 4
+   },
+   "in-law": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0014,
+    "gen/real": 0.52,
+    "model_acc": 0.0,
+    "missed": 2
+   },
+   "bhanja": {
+    "real": 0.0013,
+    "real_n": 1,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.0,
+    "missed": 1
+   },
+   "devar": {
+    "real": 0.0013,
+    "real_n": 1,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.0,
+    "missed": 1
+   },
+   "jeth": {
+    "real": 0.0013,
+    "real_n": 1,
+    "gen": 0.0,
+    "gen/real": 0.0,
+    "model_acc": 0.0,
+    "missed": 1
+   },
+   "great-great-great-great-great-grandmother": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-aunt": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-grandmother": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0136,
+    "gen/real": null
+   },
+   "sasur": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0003,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-great-great-granddaughter": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-grand-nephew": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "damaad": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0002,
+    "gen/real": null
+   },
+   "great-granddaughter": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0056,
+    "gen/real": null
+   },
+   "great-great-great-grandson": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0083,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-grand-nephew": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-granddaughter": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0,
+    "gen/real": null
+   },
+   "great-great-great-great-great-grandfather": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-grand-nephew": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-granddaughter": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "co-sister": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0003,
+    "gen/real": null
+   },
+   "great-great-great-great-great-grand-niece": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-great-great-aunt": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0,
+    "gen/real": null
+   },
+   "great-great-grandson": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0024,
+    "gen/real": null
+   },
+   "bhatiji": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0003,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-grandfather": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0,
+    "gen/real": null
+   },
+   "bhabhi": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0,
+    "gen/real": null
+   },
+   "great-great-uncle": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-uncle": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-grandmother": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-grandmother": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0071,
+    "gen/real": null
+   },
+   "great-grand-niece": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-aunt": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-grandson": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0003,
+    "gen/real": null
+   },
+   "great-great-great-great-grand-niece": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-granddaughter": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "bahu": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0,
+    "gen/real": null
+   },
+   "nani": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-great-grand-niece": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-uncle": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0035,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-grandmother": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-grandfather": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-great-granddaughter": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0,
+    "gen/real": null
+   },
+   "great-great-great-granddaughter": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0101,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-grand-niece": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0002,
+    "gen/real": null
+   },
+   "great-great-grand-nephew": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0004,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-great-grandson": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0,
+    "gen/real": null
+   },
+   "great-great-great-great-aunt": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-uncle": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0002,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-uncle": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0002,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-grand-niece": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-uncle": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-great-grandmother": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-grand-niece": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0002,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-grand-nephew": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0,
+    "gen/real": null
+   },
+   "great-great-great-great-great-grandson": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-grandmother": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0032,
+    "gen/real": null
+   },
+   "great-great-grandfather": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0038,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-aunt": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-aunt": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-great-great-grandson": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-grandmother": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-grand-nephew": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-aunt": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0005,
+    "gen/real": null
+   },
+   "great-aunt": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0036,
+    "gen/real": null
+   },
+   "great-grandson": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0053,
+    "gen/real": null
+   },
+   "great-great-great-great-great-uncle": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0002,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-granddaughter": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0002,
+    "gen/real": null
+   },
+   "great-great-great-great-grandson": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0002,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-aunt": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-grandfather": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0142,
+    "gen/real": null
+   },
+   "parent-in-law": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0004,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-great-grand-nephew": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-great-great-uncle": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "co-brother": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0002,
+    "gen/real": null
+   },
+   "grand-niece": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0067,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-great-great-grandmother": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0,
+    "gen/real": null
+   },
+   "great-grandfather": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.007,
+    "gen/real": null
+   },
+   "great-great-great-uncle": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0003,
+    "gen/real": null
+   },
+   "grandparent": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-grand-niece": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-grandson": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-grandmother": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-granddaughter": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0021,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-grandson": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-great-great-grand-niece": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "saa": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0003,
+    "gen/real": null
+   },
+   "great-great-great-great-grand-nephew": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0002,
+    "gen/real": null
+   },
+   "great-great-great-great-grandfather": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "great-grand-nephew": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0005,
+    "gen/real": null
+   },
+   "great-great-great-great-great-great-great-great-great-aunt": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0001,
+    "gen/real": null
+   },
+   "grand-nephew": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.007,
+    "gen/real": null
+   }
+  },
+  "length (words)": {
+   "<= 40": {
+    "real": 0.4238,
+    "real_n": 317,
+    "gen": 0.3011,
+    "gen/real": 0.71,
+    "model_acc": 0.798,
+    "missed": 64
+   },
+   "<= 80": {
+    "real": 0.377,
+    "real_n": 282,
+    "gen": 0.2925,
+    "gen/real": 0.78,
+    "model_acc": 0.73,
+    "missed": 76
+   },
+   "<= 120": {
+    "real": 0.0976,
+    "real_n": 73,
+    "gen": 0.0525,
+    "gen/real": 0.54,
+    "model_acc": 0.507,
+    "missed": 36
+   },
+   "<= 20": {
+    "real": 0.0802,
+    "real_n": 60,
+    "gen": 0.2929,
+    "gen/real": 3.65,
+    "model_acc": 0.667,
+    "missed": 20
+   },
+   "<= 170": {
+    "real": 0.016,
+    "real_n": 12,
+    "gen": 0.023,
+    "gen/real": 1.44,
+    "model_acc": 0.25,
+    "missed": 9
+   },
+   "<= 320": {
+    "real": 0.004,
+    "real_n": 3,
+    "gen": 0.0083,
+    "gen/real": 2.08,
+    "model_acc": 0.333,
+    "missed": 2
+   },
+   "<= 240": {
+    "real": 0.0013,
+    "real_n": 1,
+    "gen": 0.0289,
+    "gen/real": 22.23,
+    "model_acc": 0.0,
+    "missed": 1
+   },
+   "> 320": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0008,
+    "gen/real": null
+   }
+  },
+  "opening": {
+   "reported speech (said / told)": {
+    "real": 0.2874,
+    "real_n": 215,
+    "gen": 0.2383,
+    "gen/real": 0.83,
+    "model_acc": 0.758,
+    "missed": 52
+   },
+   "direct speech (quotes)": {
+    "real": 0.2834,
+    "real_n": 212,
+    "gen": 0.156,
+    "gen/real": 0.55,
+    "model_acc": 0.764,
+    "missed": 50
+   },
+   "coded symbols (\"A + B means\")": {
+    "real": 0.238,
+    "real_n": 178,
+    "gen": 0.1363,
+    "gen/real": 0.57,
+    "model_acc": 0.781,
+    "missed": 39
+   },
+   "family of N / members": {
+    "real": 0.1551,
+    "real_n": 116,
+    "gen": 0.1039,
+    "gen/real": 0.67,
+    "model_acc": 0.578,
+    "missed": 49
+   },
+   "pointing / showing": {
+    "real": 0.143,
+    "real_n": 107,
+    "gen": 0.1755,
+    "gen/real": 1.23,
+    "model_acc": 0.785,
+    "missed": 23
+   },
+   "couples / generations": {
+    "real": 0.139,
+    "real_n": 104,
+    "gen": 0.0856,
+    "gen/real": 0.62,
+    "model_acc": 0.587,
+    "missed": 43
+   },
+   "coded letters (\"A $ B\" / \"P # Q\")": {
+    "real": 0.127,
+    "real_n": 95,
+    "gen": 0.1086,
+    "gen/real": 0.86,
+    "model_acc": 0.8,
+    "missed": 19
+   },
+   "directions / study the information": {
+    "real": 0.1123,
+    "real_n": 84,
+    "gen": 0.0473,
+    "gen/real": 0.42,
+    "model_acc": 0.56,
+    "missed": 37
+   },
+   "photograph / portrait": {
+    "real": 0.1096,
+    "real_n": 82,
+    "gen": 0.0501,
+    "gen/real": 0.46,
+    "model_acc": 0.78,
+    "missed": 18
+   },
+   "which is true / conclusions": {
+    "real": 0.0909,
+    "real_n": 68,
+    "gen": 0.0566,
+    "gen/real": 0.62,
+    "model_acc": 0.603,
+    "missed": 27
+   },
+   "introducing": {
+    "real": 0.0588,
+    "real_n": 44,
+    "gen": 0.0753,
+    "gen/real": 1.28,
+    "model_acc": 0.932,
+    "missed": 3
+   },
+   "story / narrative (past tense, 60+ words)": {
+    "real": 0.0107,
+    "real_n": 8,
+    "gen": 0.0369,
+    "gen/real": 3.45,
+    "model_acc": 0.5,
+    "missed": 4
+   },
+   "cannot be determined in options": {
+    "real": 0.008,
+    "real_n": 6,
+    "gen": 0.0154,
+    "gen/real": 1.93,
+    "model_acc": 0.5,
+    "missed": 3
+   },
+   "statements I / II (sufficiency)": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0147,
+    "gen/real": 5.44,
+    "model_acc": 1.0,
+    "missed": 0
+   }
+  },
+  "options": {
+   "<= 4": {
+    "real": 0.6684,
+    "real_n": 500,
+    "gen": 0.1418,
+    "gen/real": 0.21,
+    "model_acc": 0.78,
+    "missed": 110
+   },
+   "<= 5": {
+    "real": 0.3128,
+    "real_n": 234,
+    "gen": 0.1003,
+    "gen/real": 0.32,
+    "model_acc": 0.59,
+    "missed": 96
+   },
+   "none (open question)": {
+    "real": 0.016,
+    "real_n": 12,
+    "gen": 0.7473,
+    "gen/real": 46.71,
+    "model_acc": 0.917,
+    "missed": 1
+   },
+   "<= 3": {
+    "real": 0.0027,
+    "real_n": 2,
+    "gen": 0.0054,
+    "gen/real": 2.0,
+    "model_acc": 0.5,
+    "missed": 1
+   },
+   "> 5": {
+    "real": 0.0,
+    "real_n": 0,
+    "gen": 0.0051,
+    "gen/real": null
+   }
+  },
+  "people": {
+   "<= 2": {
+    "real": 0.2781,
+    "real_n": 208,
+    "gen": 0.5081,
+    "gen/real": 1.83,
+    "model_acc": 0.779,
+    "missed": 46
+   },
+   "<= 8": {
+    "real": 0.1912,
+    "real_n": 143,
+    "gen": 0.0781,
+    "gen/real": 0.41,
+    "model_acc": 0.72,
+    "missed": 40
+   },
+   "<= 4": {
+    "real": 0.1631,
+    "real_n": 122,
+    "gen": 0.0724,
+    "gen/real": 0.44,
+    "model_acc": 0.803,
+    "missed": 24
+   },
+   "<= 6": {
+    "real": 0.1056,
+    "real_n": 79,
+    "gen": 0.0472,
+    "gen/real": 0.45,
+    "model_acc": 0.684,
+    "missed": 25
+   },
+   "<= 5": {
+    "real": 0.0976,
+    "real_n": 73,
+    "gen": 0.0919,
+    "gen/real": 0.94,
+    "model_acc": 0.726,
+    "missed": 20
+   },
+   "<= 3": {
+    "real": 0.0775,
+    "real_n": 58,
+    "gen": 0.0887,
+    "gen/real": 1.14,
+    "model_acc": 0.621,
+    "missed": 22
+   },
+   "<= 12": {
+    "real": 0.0709,
+    "real_n": 53,
+    "gen": 0.0906,
+    "gen/real": 1.28,
+    "model_acc": 0.604,
+    "missed": 21
+   },
+   "<= 20": {
+    "real": 0.0147,
+    "real_n": 11,
+    "gen": 0.0224,
+    "gen/real": 1.52,
+    "model_acc": 0.182,
+    "missed": 9
+   },
+   "<= 32": {
+    "real": 0.0013,
+    "real_n": 1,
+    "gen": 0.0006,
+    "gen/real": 0.46,
+    "model_acc": 0.0,
+    "missed": 1
+   }
+  },
+  "question form": {
+   "how is X related to Y": {
+    "real": 0.5816,
+    "real_n": 435,
+    "gen": 0.295,
+    "gen/real": 0.51,
+    "model_acc": 0.8,
+    "missed": 87
+   },
+   "which of the following": {
+    "real": 0.1511,
+    "real_n": 113,
+    "gen": 0.118,
+    "gen/real": 0.78,
+    "model_acc": 0.646,
+    "missed": 40
+   },
+   "who is the R of": {
+    "real": 0.107,
+    "real_n": 80,
+    "gen": 0.042,
+    "gen/real": 0.39,
+    "model_acc": 0.675,
+    "missed": 26
+   },
+   "no question mark": {
+    "real": 0.0401,
+    "real_n": 30,
+    "gen": 0.133,
+    "gen/real": 3.32,
+    "model_acc": 0.533,
+    "missed": 14
+   },
+   "what is the relation(ship)": {
+    "real": 0.0388,
+    "real_n": 29,
+    "gen": 0.0599,
+    "gen/real": 1.54,
+    "model_acc": 0.655,
+    "missed": 10
+   },
+   "gender of": {
+    "real": 0.0281,
+    "real_n": 21,
+    "gen": 0.1127,
+    "gen/real": 4.01,
+    "model_acc": 0.619,
+    "missed": 8
+   },
+   "how many": {
+    "real": 0.0254,
+    "real_n": 19,
+    "gen": 0.021,
+    "gen/real": 0.83,
+    "model_acc": 0.526,
+    "missed": 9
+   },
+   "whose R is": {
+    "real": 0.0187,
+    "real_n": 14,
+    "gen": 0.0164,
+    "gen/real": 0.88,
+    "model_acc": 0.857,
+    "missed": 2
+   },
+   "which pair / who among": {
+    "real": 0.012,
+    "real_n": 9,
+    "gen": 0.014,
+    "gen/real": 1.17,
+    "model_acc": 0.222,
+    "missed": 7
+   },
+   "how is X's R related": {
+    "real": 0.0013,
+    "real_n": 1,
+    "gen": 0.0146,
+    "gen/real": 11.23,
+    "model_acc": 0.0,
+    "missed": 1
+   },
+   "how are X and Y related": {
+    "real": 0.0013,
+    "real_n": 1,
+    "gen": 0.0157,
+    "gen/real": 12.08,
+    "model_acc": 0.0,
+    "missed": 1
+   },
+   "X is related to Y as": {
+    "real": 0.0013,
+    "real_n": 1,
+    "gen": 0.0209,
+    "gen/real": 16.08,
+    "model_acc": 0.0,
+    "missed": 1
+   }
+  }
+ },
+ "skeletons": [
+  {
+   "skeleton": "how is @ related to @ ?",
+   "real": 148,
+   "gen": 4033
+  },
+  {
+   "skeleton": "how is the girl @ related to @ ?",
+   "real": 14,
+   "gen": 14
+  },
+  {
+   "skeleton": "how is the man @ related to @ ?",
+   "real": 13,
+   "gen": 66
+  },
+  {
+   "skeleton": "how is the woman @ related to @ ?",
+   "real": 12,
+   "gen": 54
+  },
+  {
+   "skeleton": "if @ has no R , how is the woman @ related to @ ?",
+   "real": 12,
+   "gen": 0
+  },
+  {
+   "skeleton": "how @ is related to @ ?",
+   "real": 8,
+   "gen": 542
+  },
+  {
+   "skeleton": "how many male members are there in the family ?",
+   "real": 7,
+   "gen": 76
+  },
+  {
+   "skeleton": "which of the following means @ is the R of @ ?",
+   "real": 7,
+   "gen": 0
+  },
+  {
+   "skeleton": "who is the R of @ ?",
+   "real": 7,
+   "gen": 328
+  },
+  {
+   "skeleton": "what is the relationship between @ and @ ?",
+   "real": 7,
+   "gen": 0
+  },
+  {
+   "skeleton": "@ ?",
+   "real": 6,
+   "gen": 21
+  },
+  {
+   "skeleton": "how is the boy @ related to @ ?",
+   "real": 6,
+   "gen": 30
+  },
+  {
+   "skeleton": "how is the lady @ related to the man @ ?",
+   "real": 5,
+   "gen": 8
+  },
+  {
+   "skeleton": "how is @ related to @ 's R ?",
+   "real": 5,
+   "gen": 0
+  },
+  {
+   "skeleton": "what is @ to @ ?",
+   "real": 5,
+   "gen": 427
+  },
+  {
+   "skeleton": "how is the woman @ related to the man @ ?",
+   "real": 4,
+   "gen": 17
+  },
+  {
+   "skeleton": "how is the lady @ related to @ ?",
+   "real": 4,
+   "gen": 20
+  },
+  {
+   "skeleton": "how is the speaker related to @ 's R ?",
+   "real": 4,
+   "gen": 0
+  },
+  {
+   "skeleton": "how is the woman @ related to the man @ in the photograph ?",
+   "real": 4,
+   "gen": 1
+  },
+  {
+   "skeleton": "how is the man @ on the stage related to @ ?",
+   "real": 4,
+   "gen": 0
+  },
+  {
+   "skeleton": "how is the boy @ playing football related to @ ?",
+   "real": 4,
+   "gen": 0
+  },
+  {
+   "skeleton": "what is the relation of @ with @ ?",
+   "real": 4,
+   "gen": 0
+  },
+  {
+   "skeleton": "how is the man @ related to the woman @ ?",
+   "real": 4,
+   "gen": 12
+  },
+  {
+   "skeleton": "if @ is a man , how is the boy @ related to @ ?",
+   "real": 4,
+   "gen": 0
+  },
+  {
+   "skeleton": "which of the following means that @ is the R of @ ?",
+   "real": 3,
+   "gen": 0
+  },
+  {
+   "skeleton": "how is the person @ related to @ ?",
+   "real": 3,
+   "gen": 1
+  },
+  {
+   "skeleton": "who is @ to the girl @ ?",
+   "real": 3,
+   "gen": 1
+  },
+  {
+   "skeleton": "how is the lady @ related to the girl @ ?",
+   "real": 3,
+   "gen": 3
+  },
+  {
+   "skeleton": "which of the following is true ?",
+   "real": 3,
+   "gen": 0
+  },
+  {
+   "skeleton": "how is that man @ related to the woman @ ?",
+   "real": 3,
+   "gen": 0
+  },
+  {
+   "skeleton": "how is the girl @ related to @ 's friend ?",
+   "real": 3,
+   "gen": 0
+  },
+  {
+   "skeleton": "whose photograph was it ?",
+   "real": 3,
+   "gen": 0
+  },
+  {
+   "skeleton": "how is the girl @ 's R related to @ ?",
+   "real": 3,
+   "gen": 1
+  },
+  {
+   "skeleton": "if @ - @ \u00f7 @ - @ \u00f7 @ and @ - @ are true then how is @ related to @ ?",
+   "real": 3,
+   "gen": 0
+  },
+  {
+   "skeleton": "how many female members are there in the family ?",
+   "real": 3,
+   "gen": 60
+  },
+  {
+   "skeleton": "what is the relationship of @ to @ ?",
+   "real": 3,
+   "gen": 0
+  }
+ ],
+ "gaps": [
+  {
+   "family": "options",
+   "feature": "<= 4",
+   "real": 0.6684,
+   "real_n": 500,
+   "gen": 0.1418,
+   "gen/real": 0.21,
+   "model_acc": 0.78,
+   "missed": 110
+  },
+  {
+   "family": "construction",
+   "feature": "single letters as names (3+)",
+   "real": 0.5709,
+   "real_n": 427,
+   "gen": 0.2756,
+   "gen/real": 0.48,
+   "model_acc": 0.726,
+   "missed": 117
+  },
+  {
+   "family": "options",
+   "feature": "<= 5",
+   "real": 0.3128,
+   "real_n": 234,
+   "gen": 0.1003,
+   "gen/real": 0.32,
+   "model_acc": 0.59,
+   "missed": 96
+  },
+  {
+   "family": "people",
+   "feature": "<= 8",
+   "real": 0.1912,
+   "real_n": 143,
+   "gen": 0.0781,
+   "gen/real": 0.41,
+   "model_acc": 0.72,
+   "missed": 40
+  },
+  {
+   "family": "people",
+   "feature": "<= 4",
+   "real": 0.1631,
+   "real_n": 122,
+   "gen": 0.0724,
+   "gen/real": 0.44,
+   "model_acc": 0.803,
+   "missed": 24
+  },
+  {
+   "family": "coded",
+   "feature": "4 symbols",
+   "real": 0.0909,
+   "real_n": 68,
+   "gen": 0.0172,
+   "gen/real": 0.19,
+   "model_acc": 0.824,
+   "missed": 12
+  },
+  {
+   "family": "opening",
+   "feature": "directions / study the information",
+   "real": 0.1123,
+   "real_n": 84,
+   "gen": 0.0473,
+   "gen/real": 0.42,
+   "model_acc": 0.56,
+   "missed": 37
+  },
+  {
+   "family": "question form",
+   "feature": "who is the R of",
+   "real": 0.107,
+   "real_n": 80,
+   "gen": 0.042,
+   "gen/real": 0.39,
+   "model_acc": 0.675,
+   "missed": 26
+  },
+  {
+   "family": "opening",
+   "feature": "photograph / portrait",
+   "real": 0.1096,
+   "real_n": 82,
+   "gen": 0.0501,
+   "gen/real": 0.46,
+   "model_acc": 0.78,
+   "missed": 18
+  },
+  {
+   "family": "people",
+   "feature": "<= 6",
+   "real": 0.1056,
+   "real_n": 79,
+   "gen": 0.0472,
+   "gen/real": 0.45,
+   "model_acc": 0.684,
+   "missed": 25
+  },
+  {
+   "family": "coded",
+   "feature": "expression with 1 operators",
+   "real": 0.0842,
+   "real_n": 63,
+   "gen": 0.0278,
+   "gen/real": 0.33,
+   "model_acc": 0.714,
+   "missed": 18
+  },
+  {
+   "family": "kin word",
+   "feature": "uncle",
+   "real": 0.0949,
+   "real_n": 71,
+   "gen": 0.0457,
+   "gen/real": 0.48,
+   "model_acc": 0.606,
+   "missed": 28
+  },
+  {
+   "family": "coded",
+   "feature": "3 symbols",
+   "real": 0.0695,
+   "real_n": 52,
+   "gen": 0.0286,
+   "gen/real": 0.41,
+   "model_acc": 0.827,
+   "missed": 9
+  },
+  {
+   "family": "coded",
+   "feature": "expression with 3 operators",
+   "real": 0.0441,
+   "real_n": 33,
+   "gen": 0.0183,
+   "gen/real": 0.41,
+   "model_acc": 0.697,
+   "missed": 10
+  },
+  {
+   "family": "coded",
+   "feature": "expression with 5 operators",
+   "real": 0.0321,
+   "real_n": 24,
+   "gen": 0.0089,
+   "gen/real": 0.28,
+   "model_acc": 0.875,
+   "missed": 3
+  },
+  {
+   "family": "kin word",
+   "feature": "child",
+   "real": 0.0428,
+   "real_n": 32,
+   "gen": 0.0208,
+   "gen/real": 0.49,
+   "model_acc": 0.562,
+   "missed": 14
+  },
+  {
+   "family": "kin word",
+   "feature": "grandchild",
+   "real": 0.0174,
+   "real_n": 13,
+   "gen": 0.0,
+   "gen/real": 0.0,
+   "model_acc": 1.0,
+   "missed": 0
+  },
+  {
+   "family": "coded",
+   "feature": "expression with 6 operators",
+   "real": 0.0187,
+   "real_n": 14,
+   "gen": 0.0054,
+   "gen/real": 0.29,
+   "model_acc": 1.0,
+   "missed": 0
+  }
+ ],
+ "misses": [
+  {
+   "family": "construction",
+   "feature": "single letters as names (3+)",
+   "real": 0.5709,
+   "real_n": 427,
+   "gen": 0.2756,
+   "gen/real": 0.48,
+   "model_acc": 0.726,
+   "missed": 117
+  },
+  {
+   "family": "kin word",
+   "feature": "father",
+   "real": 0.5575,
+   "real_n": 417,
+   "gen": 0.427,
+   "gen/real": 0.77,
+   "model_acc": 0.729,
+   "missed": 113
+  },
+  {
+   "family": "options",
+   "feature": "<= 4",
+   "real": 0.6684,
+   "real_n": 500,
+   "gen": 0.1418,
+   "gen/real": 0.21,
+   "model_acc": 0.78,
+   "missed": 110
+  },
+  {
+   "family": "kin word",
+   "feature": "son",
+   "real": 0.5147,
+   "real_n": 385,
+   "gen": 0.4078,
+   "gen/real": 0.79,
+   "model_acc": 0.735,
+   "missed": 102
+  },
+  {
+   "family": "kin word",
+   "feature": "daughter",
+   "real": 0.4251,
+   "real_n": 318,
+   "gen": 0.3935,
+   "gen/real": 0.93,
+   "model_acc": 0.679,
+   "missed": 102
+  },
+  {
+   "family": "kin word",
+   "feature": "mother",
+   "real": 0.4612,
+   "real_n": 345,
+   "gen": 0.4132,
+   "gen/real": 0.9,
+   "model_acc": 0.719,
+   "missed": 97
+  },
+  {
+   "family": "options",
+   "feature": "<= 5",
+   "real": 0.3128,
+   "real_n": 234,
+   "gen": 0.1003,
+   "gen/real": 0.32,
+   "model_acc": 0.59,
+   "missed": 96
+  },
+  {
+   "family": "kin word",
+   "feature": "brother",
+   "real": 0.4813,
+   "real_n": 360,
+   "gen": 0.2653,
+   "gen/real": 0.55,
+   "model_acc": 0.75,
+   "missed": 90
+  },
+  {
+   "family": "question form",
+   "feature": "how is X related to Y",
+   "real": 0.5816,
+   "real_n": 435,
+   "gen": 0.295,
+   "gen/real": 0.51,
+   "model_acc": 0.8,
+   "missed": 87
+  },
+  {
+   "family": "kin word",
+   "feature": "sister",
+   "real": 0.3663,
+   "real_n": 274,
+   "gen": 0.2594,
+   "gen/real": 0.71,
+   "model_acc": 0.697,
+   "missed": 83
+  },
+  {
+   "family": "construction",
+   "feature": "first person (my / I / me)",
+   "real": 0.4144,
+   "real_n": 310,
+   "gen": 0.2345,
+   "gen/real": 0.57,
+   "model_acc": 0.735,
+   "missed": 82
+  },
+  {
+   "family": "length (words)",
+   "feature": "<= 80",
+   "real": 0.377,
+   "real_n": 282,
+   "gen": 0.2925,
+   "gen/real": 0.78,
+   "model_acc": 0.73,
+   "missed": 76
+  },
+  {
+   "family": "construction",
+   "feature": "only",
+   "real": 0.3356,
+   "real_n": 251,
+   "gen": 0.2737,
+   "gen/real": 0.82,
+   "model_acc": 0.729,
+   "missed": 68
+  },
+  {
+   "family": "length (words)",
+   "feature": "<= 40",
+   "real": 0.4238,
+   "real_n": 317,
+   "gen": 0.3011,
+   "gen/real": 0.71,
+   "model_acc": 0.798,
+   "missed": 64
+  },
+  {
+   "family": "construction",
+   "feature": "great- / grand- relations",
+   "real": 0.2433,
+   "real_n": 182,
+   "gen": 0.2108,
+   "gen/real": 0.87,
+   "model_acc": 0.676,
+   "missed": 59
+  },
+  {
+   "family": "construction",
+   "feature": "married / unmarried / bachelor",
+   "real": 0.1965,
+   "real_n": 147,
+   "gen": 0.0993,
+   "gen/real": 0.51,
+   "model_acc": 0.619,
+   "missed": 56
+  },
+  {
+   "family": "construction",
+   "feature": "pronoun he / she / his / her",
+   "real": 0.254,
+   "real_n": 190,
+   "gen": 0.3214,
+   "gen/real": 1.27,
+   "model_acc": 0.726,
+   "missed": 52
+  },
+  {
+   "family": "opening",
+   "feature": "reported speech (said / told)",
+   "real": 0.2874,
+   "real_n": 215,
+   "gen": 0.2383,
+   "gen/real": 0.83,
+   "model_acc": 0.758,
+   "missed": 52
+  },
+  {
+   "family": "opening",
+   "feature": "direct speech (quotes)",
+   "real": 0.2834,
+   "real_n": 212,
+   "gen": 0.156,
+   "gen/real": 0.55,
+   "model_acc": 0.764,
+   "missed": 50
+  },
+  {
+   "family": "opening",
+   "feature": "family of N / members",
+   "real": 0.1551,
+   "real_n": 116,
+   "gen": 0.1039,
+   "gen/real": 0.67,
+   "model_acc": 0.578,
+   "missed": 49
+  },
+  {
+   "family": "construction",
+   "feature": "negation (not / no / neither)",
+   "real": 0.1618,
+   "real_n": 121,
+   "gen": 0.1209,
+   "gen/real": 0.75,
+   "model_acc": 0.603,
+   "missed": 48
+  },
+  {
+   "family": "people",
+   "feature": "<= 2",
+   "real": 0.2781,
+   "real_n": 208,
+   "gen": 0.5081,
+   "gen/real": 1.83,
+   "model_acc": 0.779,
+   "missed": 46
+  },
+  {
+   "family": "opening",
+   "feature": "couples / generations",
+   "real": 0.139,
+   "real_n": 104,
+   "gen": 0.0856,
+   "gen/real": 0.62,
+   "model_acc": 0.587,
+   "missed": 43
+  },
+  {
+   "family": "kin word",
+   "feature": "wife",
+   "real": 0.2326,
+   "real_n": 174,
+   "gen": 0.3283,
+   "gen/real": 1.41,
+   "model_acc": 0.764,
+   "missed": 41
+  },
+  {
+   "family": "people",
+   "feature": "<= 8",
+   "real": 0.1912,
+   "real_n": 143,
+   "gen": 0.0781,
+   "gen/real": 0.41,
+   "model_acc": 0.72,
+   "missed": 40
+  },
+  {
+   "family": "question form",
+   "feature": "which of the following",
+   "real": 0.1511,
+   "real_n": 113,
+   "gen": 0.118,
+   "gen/real": 0.78,
+   "model_acc": 0.646,
+   "missed": 40
+  },
+  {
+   "family": "opening",
+   "feature": "coded symbols (\"A + B means\")",
+   "real": 0.238,
+   "real_n": 178,
+   "gen": 0.1363,
+   "gen/real": 0.57,
+   "model_acc": 0.781,
+   "missed": 39
+  },
+  {
+   "family": "opening",
+   "feature": "directions / study the information",
+   "real": 0.1123,
+   "real_n": 84,
+   "gen": 0.0473,
+   "gen/real": 0.42,
+   "model_acc": 0.56,
+   "missed": 37
+  },
+  {
+   "family": "length (words)",
+   "feature": "<= 120",
+   "real": 0.0976,
+   "real_n": 73,
+   "gen": 0.0525,
+   "gen/real": 0.54,
+   "model_acc": 0.507,
+   "missed": 36
+  },
+  {
+   "family": "kin word",
+   "feature": "grandfather",
+   "real": 0.0976,
+   "real_n": 73,
+   "gen": 0.0577,
+   "gen/real": 0.59,
+   "model_acc": 0.616,
+   "missed": 28
+  },
+  {
+   "family": "kin word",
+   "feature": "uncle",
+   "real": 0.0949,
+   "real_n": 71,
+   "gen": 0.0457,
+   "gen/real": 0.48,
+   "model_acc": 0.606,
+   "missed": 28
+  },
+  {
+   "family": "opening",
+   "feature": "which is true / conclusions",
+   "real": 0.0909,
+   "real_n": 68,
+   "gen": 0.0566,
+   "gen/real": 0.62,
+   "model_acc": 0.603,
+   "missed": 27
+  },
+  {
+   "family": "question form",
+   "feature": "who is the R of",
+   "real": 0.107,
+   "real_n": 80,
+   "gen": 0.042,
+   "gen/real": 0.39,
+   "model_acc": 0.675,
+   "missed": 26
+  },
+  {
+   "family": "people",
+   "feature": "<= 6",
+   "real": 0.1056,
+   "real_n": 79,
+   "gen": 0.0472,
+   "gen/real": 0.45,
+   "model_acc": 0.684,
+   "missed": 25
+  },
+  {
+   "family": "construction",
+   "feature": "paternal / maternal side",
+   "real": 0.0816,
+   "real_n": 61,
+   "gen": 0.0536,
+   "gen/real": 0.66,
+   "model_acc": 0.607,
+   "missed": 24
+  },
+  {
+   "family": "people",
+   "feature": "<= 4",
+   "real": 0.1631,
+   "real_n": 122,
+   "gen": 0.0724,
+   "gen/real": 0.44,
+   "model_acc": 0.803,
+   "missed": 24
+  },
+  {
+   "family": "opening",
+   "feature": "pointing / showing",
+   "real": 0.143,
+   "real_n": 107,
+   "gen": 0.1755,
+   "gen/real": 1.23,
+   "model_acc": 0.785,
+   "missed": 23
+  },
+  {
+   "family": "kin word",
+   "feature": "husband",
+   "real": 0.1444,
+   "real_n": 108,
+   "gen": 0.3324,
+   "gen/real": 2.3,
+   "model_acc": 0.796,
+   "missed": 22
+  },
+  {
+   "family": "people",
+   "feature": "<= 3",
+   "real": 0.0775,
+   "real_n": 58,
+   "gen": 0.0887,
+   "gen/real": 1.14,
+   "model_acc": 0.621,
+   "missed": 22
+  },
+  {
+   "family": "people",
+   "feature": "<= 12",
+   "real": 0.0709,
+   "real_n": 53,
+   "gen": 0.0906,
+   "gen/real": 1.28,
+   "model_acc": 0.604,
+   "missed": 21
+  }
+ ]
+}

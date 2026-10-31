@@ -1,0 +1,11 @@
+{
+ "split": "dev",
+ "old_fair": "528/714 = 73.9%",
+ "new_fair": "525/714 = 73.5%",
+ "gain_points": -0.42,
+ "wins": 13,
+ "losses": 16,
+ "p": 0.7111,
+ "adopt": false,
+ "rule": "gain >= 2.0 points, wins > losses, McNemar p < 0.05"
+}

@@ -1,0 +1,57 @@
+{
+ "questions": 714,
+ "settings": {
+  "base": {
+   "correct": 527,
+   "wins": 0,
+   "losses": 0,
+   "p": 1.0,
+   "adopt": false
+  },
+  "closure": {
+   "correct": 527,
+   "wins": 0,
+   "losses": 0,
+   "p": 1.0,
+   "adopt": false
+  },
+  "core_repair": {
+   "correct": 529,
+   "wins": 2,
+   "losses": 0,
+   "p": 0.5,
+   "adopt": false
+  },
+  "lever": {
+   "correct": 523,
+   "wins": 1,
+   "losses": 5,
+   "p": 0.2188,
+   "adopt": false
+  },
+  "trace_pow1": {
+   "correct": 527,
+   "wins": 0,
+   "losses": 0,
+   "p": 1.0,
+   "adopt": false
+  },
+  "closure+core": {
+   "correct": 529,
+   "wins": 2,
+   "losses": 0,
+   "p": 0.5,
+   "adopt": false
+  },
+  "all": {
+   "correct": 526,
+   "wins": 3,
+   "losses": 4,
+   "p": 1.0,
+   "adopt": false
+  }
+ },
+ "adopted": null,
+ "adopted_cli": "",
+ "reproduced": 698
+}

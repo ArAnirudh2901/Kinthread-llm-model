@@ -1,0 +1,37 @@
+{
+ "reader": "model",
+ "groups": 300,
+ "all variants agree": 0.94,
+ "by transform": {
+  "base": {
+   "n": 300,
+   "same as base": 1.0,
+   "correct": 0.9583
+  },
+  "detour 1": {
+   "n": 150,
+   "same as base": 0.9133,
+   "correct": 0.9533
+  },
+  "detour 2": {
+   "n": 150,
+   "same as base": 0.9267,
+   "correct": 0.96
+  },
+  "rename": {
+   "n": 258,
+   "same as base": 1.0,
+   "correct": 0.9621
+  },
+  "options": {
+   "n": 55,
+   "same as base": 0.9455,
+   "correct": 1.0
+  },
+  "reorder": {
+   "n": 9,
+   "same as base": 0.8889,
+   "correct": 0.8889
+  }
+ }
+}
