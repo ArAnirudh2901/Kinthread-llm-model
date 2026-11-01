@@ -1,0 +1,23 @@
+{
+ "unseen_acc": 0.9957,
+ "unseen_model_acc": 0.9957142857142857,
+ "unseen_n": 1400,
+ "unseen_by_kind": {
+  "claims": "99/99",
+  "coded": "100/100",
+  "deep": "97/97",
+  "deep-coded": "118/118",
+  "deep-nested": "100/100",
+  "deep-speech": "110/110",
+  "deep-statements": "102/102",
+  "deep-story": "119/119",
+  "identity": "83/83",
+  "introduce": "31/31",
+  "nested": "12/12",
+  "puzzle": "100/100",
+  "speech": "76/76",
+  "statements": "75/75",
+  "story": "90/95",
+  "sufficiency": "82/83"
+ }
+}

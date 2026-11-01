@@ -1,0 +1,24 @@
+{
+ "step": "C",
+ "r11_sha256": "a65529da43fe546c3837b10a7b841df1e8d2bf44bfad626b9a36bbbd1c14a51b",
+ "focus_rows": 60000,
+ "focus_rows_sha256": "7a74027d280955564d5bb19ad7d100acb9e4829416439f7cafe278b3b92b7284",
+ "compile": {
+  "compile_q_per_s": 107.2,
+  "eager_q_per_s": 62.7,
+  "compile_loss": 0.0167,
+  "eager_loss": 0.005,
+  "chosen": "--compile"
+ },
+ "r11_dev_quick_adaptive_hybrid": {
+  "dev": "531/748 = 71.0%",
+  "dev fair": "521/714 = 73.0%",
+  "dev verified": "497/650 = 76.5%"
+ },
+ "r11_dev_quick_focus": {
+  "dev": "529/748 = 70.7%",
+  "dev fair": "520/714 = 72.8%",
+  "dev verified": "496/650 = 76.3%"
+ },
+ "r9p_same_setting": "520/714 = 72.8% fair (results/r9p/C)"
+}

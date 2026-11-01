@@ -15,8 +15,8 @@ import build_notebooks as r9   # noqa: E402
 
 USER = r9.USER
 r9.HERE = os.path.dirname(os.path.abspath(__file__))
-r9.SLUG = {'C': 'kinthread-r11-c-train', 'D': 'kinthread-r11-d-select', 'E': 'kinthread-r11-e-locked'}
-code, COMMON, R8P = r9.code, r9.COMMON, r9.R8P
+r9.SLUG = {'C': 'kinthread-r11-c-train', 'D': 'kinthread-r11-d-select', 'E': 'kinthread-r11-e-locked', 'F': 'kinthread-r11-f-flags'}
+code, COMMON, R8P, VERIFIER = r9.code, r9.COMMON, r9.R8P, r9.VERIFIER
 
 C = [code(COMMON + R8P + '''
 sh('pip -q install -U gdown')
@@ -132,9 +132,25 @@ for cell in E:
     src = src.replace('kinthread-r9p-', 'kinthread-r11-').replace('r9p', 'r11')
     cell['source'] = src.replace("VER = one('public/r11_verifier.json'", "VER = one('public/' + dec.get('verifier', 'r11_verifier.json')")
 
+F = [code(COMMON + R8P + VERIFIER), code('''
+# reading flags on r8p (no training): same FINAL setting plus one flag, vs step A's r8p dev run
+A_DEV = one('private/r8p_dev_final.json', 'the output of kinthread-r9p-a-baseline')
+ARMS = {'keep_first': '--keep_first', 'max_new0': '--max_new 0', 'both': '--keep_first --max_new 0'}
+par(*[f'python -m eval.run_real --ckpt runs/v10-r8p-final/best.pt --split dev {R8P_FINAL} {f} --out {PRIV}/r8p_dev_{n}.json'
+      for n, f in ARMS.items()])
+for n in ARMS:
+    sh(f'python -m eval.compare_runs {A_DEV} {PRIV}/r8p_dev_{n}.json --out {PUB}/compare_{n}.json')
+summary = {'step': 'F', 'arms': {n: json.load(open(f'{PUB}/compare_{n}.json')) for n in ARMS}, 'r8p_sha256': sha('runs/v10-r8p-final/best.pt')}
+json.dump(summary, open(f'{PUB}/F_summary.json', 'w'), indent=1)
+print(json.dumps(summary, indent=1))
+print('F DONE')
+''')]
+
 if __name__ == '__main__':
     print(r9.write('C', '# r11 step C: focus rows, compile smoke test, then r11 = r8p fine-tuned with focus rows\nAbout 6-8 h.', C, []))
     print(r9.write('D', '# r11 step D: verifiers and suites per reading path, dev with split search and with split + focus search vs r8p, suites, adopt or keep\nAbout 4-6 h.', D,
                    [f'{USER}/kinthread-r9p-a-baseline', f'{USER}/kinthread-r9p-b1-suites-r8p', f"{USER}/{r9.SLUG['C']}"]))
     print(r9.write('E', '# r11 step E: locked test, once, only with the owner approval\nAbout 1-2 h.', E,
                    [f"{USER}/{r9.SLUG[k]}" for k in ('C', 'D')]))
+    print(r9.write('F', '# r11 step F: r8p with --keep_first / --max_new 0 on dev (no training)\nAbout 1-2 h.', F,
+                   [f'{USER}/kinthread-r9p-a-baseline']))
