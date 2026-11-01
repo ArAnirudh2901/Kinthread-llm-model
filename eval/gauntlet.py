@@ -58,6 +58,12 @@ CATEGORIES = {
 }
 
 
+def _focus(read, model, vocab):
+    from kinlogic.exam import with_split_search
+    from reader import focus_fits
+    return with_split_search(read, focus=True, min_sentences=2, fits=focus_fits(model, vocab))
+
+
 def gold_answer(row) -> dict:
     return exam.answer(row['text'], lambda batch: [[(row['lf'], 0.0)] for _ in batch])
 
@@ -127,6 +133,7 @@ def main():
     ap.add_argument('--reader', choices=('gold', 'exact', 'model'), default=None)
     ap.add_argument('--ckpt', default=None)
     ap.add_argument('--k', type=int, default=16)
+    ap.add_argument('--focus_search', action='store_true', help='also join sentence reads made in the whole question (exam.with_split_search focus=True), as run_real --focus_search')
     ap.add_argument('--cpu', action='store_true')
     ap.add_argument('--out', default=None)
     a = ap.parse_args()
@@ -144,7 +151,9 @@ def main():
         from train import get_device
         dev = get_device(force_cpu=a.cpu)
         model, vocab = load_model(a.ckpt, dev)
-        fn = lambda text: exam.answer(text, lambda batch: generate(model, vocab, batch, dev, k=a.k))
+        read = lambda batch: generate(model, vocab, batch, dev, k=a.k)
+        read = _focus(read, model, vocab) if a.focus_search else read
+        fn = lambda text: exam.answer(text, read)
     elif mode == 'gold':
         lf = {r['text']: r['lf'] for r in rows if r['lf']}
         lf.update({r['twin']: r['lf'] for r in rows if r['lf'] and r.get('twin')})

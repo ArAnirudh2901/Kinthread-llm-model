@@ -134,6 +134,8 @@ if __name__ == '__main__':
     ap.add_argument('--adaptive', type=float, default=None, help='re-read with beam 2k + 2k samples when the vote share is below this')
     ap.add_argument('--check', action='store_true', help='execution-guided beam: readings no family fits do not count toward k')
     ap.add_argument('--loop_noise', type=float, default=0.0, help='looped reader: relative noise at each later loop start (sampled readings)')
+    ap.add_argument('--keep_first', action='store_true', help='--adaptive: a re-read with no family or no question keeps the first answer (off: r8p baseline behaviour)')
+    ap.add_argument('--focus_search', action='store_true', help='split_search with each sentence read in the whole question (reader trained on build_focus.py rows)')
     ap.add_argument('--simplify', action='store_true', help='questions with relative clauses also read with the clauses split into plain sentences (exam.simplify)')
     ap.add_argument('--hybrid', action='store_true', help='model readings also merged with the exact facts of the clauses the rules understand (exam.with_exact_clauses)')
     ap.add_argument('--by_sentence', action='store_true', help='long questions also read sentence by sentence (exam.with_split), one more vote')
@@ -148,7 +150,7 @@ if __name__ == '__main__':
     ap.add_argument('--correct', action='store_true', help='re-read and correct unsure readings (exam.answer_corrected; needs a reader trained on correction rows)')
     ap.add_argument('--trace', default=None, help='per-question trace (JSONL: route, every reading, engine results) for eval.trace_report')
     ap.add_argument('--trace_shadow', action='store_true', help='with --trace: also answer exactly-read questions with the exact readers off (the model alone)')
-    ap.add_argument('--max_new', type=int, default=96, help='reader output budget in tokens (long stories need up to ~150)')
+    ap.add_argument('--max_new', type=int, default=96, help='reader output budget in tokens (long stories need up to ~150); 0: as many as fit, up to 256')
     ap.add_argument('--reserve', type=int, default=0, help='within this many tokens of the budget, finish the statement and write the question (0: off)')
     ap.add_argument('--closure', action='store_true', help="'not related' with unnamed relatives: retry with everyone named in one family")
     ap.add_argument('--core_repair', action='store_true', help='every reading contradicts: answer without each fact of a minimal conflicting set')
@@ -184,9 +186,16 @@ if __name__ == '__main__':
     if a.by_sentence:
         from kinlogic.exam import with_split
         read = with_split(read)
-    if a.split_search:
+    base = read   # sentence reads: the plain reader, so stacked searches add their joins without nesting
+    if a.split_search or a.focus_search:
         from kinlogic.exam import with_split_search
-        read = with_split_search(read)
+        from reader import focus_fits
+        fits = focus_fits(model, vocab)
+    if a.split_search:
+        read = with_split_search(read, fits=fits, base=base)
+    if a.focus_search:   # adds to split search; the adaptive re-read gets it too, or a split vote never sees it
+        read = with_split_search(read, focus=True, min_sentences=2, fits=fits, base=base)
+        more = with_split_search(more, focus=True, min_sentences=2, fits=fits, base=base) if more else None
     if a.simplify:
         from kinlogic.exam import with_simplified
         read = with_simplified(read)
@@ -201,6 +210,7 @@ if __name__ == '__main__':
     import kinlogic.exam as E
     E.COVER = E.COVER or a.cover
     E.CLOSURE, E.CORE_REPAIR, E.LEVER, E.TRACE_POW = a.closure, a.core_repair, a.lever, a.trace_pow
+    E.KEEP_FIRST = a.keep_first
     if a.correct:   # engine verdict -> re-read, after whatever gives the first answer (adaptive, looped)
         first = fn or (lambda text: answer_adaptive(text, read, more, a.adaptive or 0.6) if more else answer(text, read))
         fn = lambda text: answer_corrected(text, read, a.adaptive or 0.6, first=first)

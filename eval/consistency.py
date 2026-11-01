@@ -147,6 +147,12 @@ def evaluate(gs, answer_fn):
     return {'groups': len(gs), 'all variants agree': round(all_same / max(len(gs), 1), 4), 'by transform': report}
 
 
+def _focus(read, model, vocab):
+    from kinlogic.exam import with_split_search
+    from reader import focus_fits
+    return with_split_search(read, focus=True, min_sentences=2, fits=focus_fits(model, vocab))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--groups', type=int, default=300)
@@ -154,6 +160,7 @@ def main():
     ap.add_argument('--reader', choices=('gold', 'exact', 'model'), default=None)
     ap.add_argument('--ckpt', default=None)
     ap.add_argument('--k', type=int, default=16)
+    ap.add_argument('--focus_search', action='store_true', help='also join sentence reads made in the whole question (exam.with_split_search focus=True), as run_real --focus_search')
     ap.add_argument('--cpu', action='store_true')
     ap.add_argument('--out', default=None)
     a = ap.parse_args()
@@ -165,6 +172,7 @@ def main():
         dev = get_device(force_cpu=a.cpu)
         model, vocab = load(a.ckpt, dev)
         read = lambda batch: generate(model, vocab, batch, dev, k=a.k)
+        read = _focus(read, model, vocab) if a.focus_search else read
         answer_fn = lambda row: exam.answer(row['text'], read)
     elif mode == 'gold':
         answer_fn = lambda row: exam.answer(row['text'], lambda batch: [[(row['lf'], 0.0)] for _ in batch])

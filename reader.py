@@ -11,7 +11,7 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
-from kinlogic.facts import allowed_next, budget_filter, compact_people, vocabulary
+from kinlogic.facts import FOCUS, allowed_next, budget_filter, compact_people, vocabulary
 from qa_data import _heads, encode_prefix, hidden_states
 
 SPECIALS = ['<pad>', '<unk>', '<bos>', '<c>', '<sep>', '<eos>']
@@ -149,20 +149,58 @@ def _allowed_ids(vocab: Vocab, written, ents, left: int = 1 << 30, reserve: int 
     return [vocab.stoi['<sep>' if a == ';' else a] for a in toks if ('<sep>' if a == ';' else a) in vocab.stoi]
 
 
+AUTO_CAP = 256   # max_new <= 0: as many output tokens as fit, up to this (long stories need ~150)
+
+
 def _budget(model, vocab: Vocab, chunk, max_new):
-    """Output budget of a chunk: max_new when its questions fit, else never cutting a question more than 96 would."""
-    need = max(len(vocab.encode(t)) for t in chunk) + 2
-    return max(min(max_new, 96), min(max_new, model.block_size - need))
+    """Output budget of a chunk: max_new when its questions fit, else never cutting a question more than 96 would.
+    A chunk of sentence reads (FOCUS) is never cut: its budget shrinks to what fits (callers check it is enough)."""
+    fit = model.block_size - (max(len(vocab.encode(t)) for t in chunk) + 2)
+    if max_new <= 0:
+        max_new = max(96, min(AUTO_CAP, fit))
+    if any(FOCUS in t for t in chunk):
+        return max(1, min(max_new, fit))
+    return max(min(max_new, 96), min(max_new, fit))
+
+
+FOCUS_ROOM = 64   # output tokens a sentence read needs: one sentence's facts are at most 31 in generated rows
+
+
+def focus_fits(model, vocab: Vocab, room: int = FOCUS_ROOM):
+    """tokens -> whether one sentence read fits the model with `room` tokens to write (exam.with_split_search)."""
+    return lambda t: len(vocab.encode(t)) + 2 + room <= model.block_size
+
+
+def _shared_question(model, vocab: Vocab, pre):
+    """(question ids, per-row '<focus>' sentence ids) when every row is one question read at another sentence and the
+    model keeps the question blind to the sentence (focus_mask): then the question is run once (prefill_focus)."""
+    f = vocab.stoi.get(FOCUS)
+    if (f is None or not getattr(model, 'focus_mask', False) or not model.prefix_lm or model.f_id != f
+            or getattr(model, 'loop_noise', 0) or any(b.canon_a is not None for b in model.blocks)):
+        return None   # causal readers, per-row loop noise and Canon need every row run in full
+    cut = [p.index(f) if f in p else 0 for p in pre]
+    if min(cut) < 1 or len({tuple(p[:i]) for p, i in zip(pre, cut)}) != 1:
+        return None
+    return pre[0][:cut[0]], [p[i:] for p, i in zip(pre, cut)]
 
 
 def _prefix(model, vocab: Vocab, chunk, device, max_new):
     pre = [[vocab.stoi['<bos>']] + vocab.encode(t) + [vocab.stoi['<c>']] for t in chunk]
+    ents = [list(dict.fromkeys(t for t in toks if t[0] == '@' and t in vocab.stoi)) for toks in chunk]
+    shared = _shared_question(model, vocab, pre) if getattr(model, 'arch', None) == 'v10' else None
+    if shared and max(len(p) for p in pre) + max_new <= model.block_size:
+        q, fs = shared
+        flen = torch.tensor([len(x) for x in fs], device=device)
+        f = torch.full((len(fs), int(flen.max())), vocab.stoi['<pad>'], dtype=torch.long)
+        for i, x in enumerate(fs):
+            f[i, :len(x)] = torch.tensor(x)
+        cache, logp = model.prefill_focus(torch.tensor([q], device=device), f.to(device), flen)
+        return cache, logp, len(q) + flen, len(q) + f.size(1), ents
     pre = [p[-(model.block_size - max_new):] for p in pre]
     plen = torch.tensor([len(p) for p in pre], device=device)
     idx = torch.full((len(pre), int(plen.max())), vocab.stoi['<pad>'], dtype=torch.long)
     for i, p in enumerate(pre):
         idx[i, :len(p)] = torch.tensor(p)
-    ents = [list(dict.fromkeys(t for t in toks if t[0] == '@' and t in vocab.stoi)) for toks in chunk]
     if getattr(model, 'arch', None) == 'v10':   # log-probabilities, copy head included
         cache, logp = model.prefill(idx.to(device), plen)
         return cache, logp, plen, idx.size(1), ents
@@ -210,6 +248,9 @@ def generate(model, vocab: Vocab, inputs: list[list[str]], device, k: int = 1, s
     for b in range(0, len(inputs), bs):
         chunk = inputs[b:b + bs]
         budget = _budget(model, vocab, chunk, max_new)
+        if any(FOCUS in t for t in chunk) and budget < min(max_new if max_new > 0 else FOCUS_ROOM, FOCUS_ROOM):
+            out += [[('', float('-inf'))] for _ in chunk]   # a sentence read with no room to write: none, never a cut question
+            continue
         cache, logits, plen, P, ents = _prefix(model, vocab, chunk, device, budget)
         width = k
         rows = torch.arange(len(chunk), device=device)

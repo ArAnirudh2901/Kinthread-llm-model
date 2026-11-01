@@ -48,12 +48,23 @@ def main():
     ap.add_argument('--ckpt', required=True)
     ap.add_argument('--n', type=int, default=1500)
     ap.add_argument('--k', type=int, default=8)
+    ap.add_argument('--split_search', action='store_true', help='train on split-search joins too, as run_real uses them')
+    ap.add_argument('--focus_search', action='store_true', help='also join sentence reads made in the whole question (exam.with_split_search focus=True), as run_real --focus_search')
     ap.add_argument('--out', default='runs/verifier.json')
     a = ap.parse_args()
     dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model, vocab = load(a.ckpt, dev)
-    read = with_exact_clauses(lambda b: [x + y for x, y in zip(generate(model, vocab, b, dev, k=2 * a.k),
-                                                                 generate(model, vocab, b, dev, k=2 * a.k, sample=True, temperature=1.0))])
+    inner = lambda b: [x + y for x, y in zip(generate(model, vocab, b, dev, k=2 * a.k),
+                                             generate(model, vocab, b, dev, k=2 * a.k, sample=True, temperature=1.0))]
+    if a.split_search or a.focus_search:   # joined readings get weights from what the verifier saw (run_real's order)
+        from kinlogic.exam import with_split_search
+        from reader import focus_fits
+        base, fits = (lambda b: generate(model, vocab, b, dev, k=2 * a.k)), focus_fits(model, vocab)
+        if a.split_search:
+            inner = with_split_search(inner, fits=fits, base=base)
+        if a.focus_search:
+            inner = with_split_search(inner, focus=True, min_sentences=2, fits=fits, base=base)
+    read = with_exact_clauses(inner)
     data = []
     for i, (text, gold) in enumerate(keyed(a.n)):
         try:

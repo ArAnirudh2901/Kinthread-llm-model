@@ -46,6 +46,8 @@ RELS = [*KIN, *sorted(NONKIN)]
 NUMBERS = [str(n) for n in range(0, 21)]
 ENT_RE = re.compile(r'^[@#]\d+$')
 
+FOCUS = '<focus>'   # input only: the question, then FOCUS and the one sentence to read (build_focus.py)
+
 
 def is_ent(t: str) -> bool:
     return bool(ENT_RE.match(t))
