@@ -147,12 +147,6 @@ def evaluate(gs, answer_fn):
     return {'groups': len(gs), 'all variants agree': round(all_same / max(len(gs), 1), 4), 'by transform': report}
 
 
-def _focus(read, model, vocab):
-    from kinlogic.exam import with_split_search
-    from reader import focus_fits
-    return with_split_search(read, focus=True, min_sentences=2, fits=focus_fits(model, vocab))
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--groups', type=int, default=300)
@@ -171,14 +165,20 @@ def main():
         from train import get_device
         dev = get_device(force_cpu=a.cpu)
         model, vocab = load(a.ckpt, dev)
-        read = lambda batch: generate(model, vocab, batch, dev, k=a.k)
-        read = _focus(read, model, vocab) if a.focus_search else read
-        answer_fn = lambda row: exam.answer(row['text'], read)
+        from eval.batched import Rounds
+        R = Rounds(lambda b, **kw: generate(model, vocab, b, dev, **kw), rows=256 if dev.type == 'cuda' else 64)
+        read = lambda batch: R(batch, k=a.k)   # decoded in batches across questions (eval/batched.py)
+        if a.focus_search:
+            from reader import FOCUS_K, with_focus
+            read = with_focus(read, model, vocab, dev, base=lambda b: R(b, k=FOCUS_K))
+        gs = groups(a.groups, a.seed)
+        solve = R.memo(lambda text: exam.answer(text, read), [row['text'] for g in gs for _, row in g])
+        answer_fn = lambda row: solve(row['text'])
     elif mode == 'gold':
         answer_fn = lambda row: exam.answer(row['text'], lambda batch: [[(row['lf'], 0.0)] for _ in batch])
     else:
         answer_fn = lambda row: exam.answer(row['text'], lambda batch: [[('', float('-inf'))] for _ in batch])
-    res = {'reader': mode, **evaluate(groups(a.groups, a.seed), answer_fn)}
+    res = {'reader': mode, **evaluate(gs if mode == 'model' else groups(a.groups, a.seed), answer_fn)}
     print(json.dumps(res, indent=1))
     if a.out:
         with open(a.out, 'w') as f:

@@ -54,23 +54,32 @@ def main():
     a = ap.parse_args()
     dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model, vocab = load(a.ckpt, dev)
-    inner = lambda b: [x + y for x, y in zip(generate(model, vocab, b, dev, k=2 * a.k),
-                                             generate(model, vocab, b, dev, k=2 * a.k, sample=True, temperature=1.0))]
+    from eval.batched import Rounds
+    R = Rounds(lambda b, **kw: generate(model, vocab, b, dev, **kw), rows=256 if dev.type == 'cuda' else 64)   # batched across questions
+    inner = lambda b: [x + y for x, y in zip(R(b, k=2 * a.k), R(b, k=2 * a.k, sample=True, temperature=1.0))]
     if a.split_search or a.focus_search:   # joined readings get weights from what the verifier saw (run_real's order)
         from kinlogic.exam import with_split_search
-        from reader import focus_fits
-        base, fits = (lambda b: generate(model, vocab, b, dev, k=2 * a.k)), focus_fits(model, vocab)
+        from reader import FOCUS_K, focus_fits, with_focus
+        base, fits = (lambda b: R(b, k=2 * a.k)), focus_fits(model, vocab)
         if a.split_search:
             inner = with_split_search(inner, fits=fits, base=base)
         if a.focus_search:
-            inner = with_split_search(inner, focus=True, min_sentences=2, fits=fits, base=base)
+            inner = with_focus(inner, model, vocab, dev, base=lambda b: R(b, k=FOCUS_K))
     read = with_exact_clauses(inner)
-    data = []
-    for i, (text, gold) in enumerate(keyed(a.n)):
+
+    def safe(text):
         try:
-            p, results = candidates(text, read)
-        except Exception:
+            return candidates(text, read)
+        except Exception:   # a question the pipeline cannot answer is left out, as before
+            return None
+
+    items = list(keyed(a.n))
+    got = R.answer_all(safe, [t for t, _ in items])
+    data = []
+    for i, ((text, gold), done) in enumerate(zip(items, got)):
+        if done is None:
             continue
+        p, results = done
         good = [(r, sc) for r, sc in results if r['status'] not in ('error', 'contradiction', 'none')]
         if not good:
             continue

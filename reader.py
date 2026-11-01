@@ -11,7 +11,7 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
-from kinlogic.facts import FOCUS, allowed_next, budget_filter, compact_people, vocabulary
+from kinlogic.facts import FOCUS, allowed_at, allowed_next, budget_filter, compact_people, vocabulary
 from qa_data import _heads, encode_prefix, hidden_states
 
 SPECIALS = ['<pad>', '<unk>', '<bos>', '<c>', '<sep>', '<eos>']
@@ -171,6 +171,17 @@ def focus_fits(model, vocab: Vocab, room: int = FOCUS_ROOM):
     return lambda t: len(vocab.encode(t)) + 2 + room <= model.block_size
 
 
+FOCUS_K = 4   # beam of each sentence read: the join keeps its 3 best (exam.with_split_search k)
+
+
+def with_focus(read, model, vocab: Vocab, device, base=None, **kw):
+    """read plus focus-search joins (exam.with_split_search focus=True); sentence reads by `base`, else a
+    FOCUS_K-wide beam of this model. Shared by run_real, the suites and the verifier so all read the same way."""
+    from kinlogic.exam import with_split_search
+    base = base or (lambda b: generate(model, vocab, b, device, k=FOCUS_K, **kw))
+    return with_split_search(read, focus=True, min_sentences=2, fits=focus_fits(model, vocab), base=base)
+
+
 def _shared_question(model, vocab: Vocab, pre):
     """(question ids, per-row '<focus>' sentence ids) when every row is one question read at another sentence and the
     model keeps the question blind to the sentence (focus_mask): then the question is run once (prefill_focus)."""
@@ -233,6 +244,28 @@ def _text(written):
     return ' '.join(w)
 
 
+_IDS = {}   # (vocabulary, question's people, grammar state) -> allowed token ids; readings and questions repeat states
+
+
+def _state_ids(vocab: Vocab, ents: tuple, cur: tuple, n_new: int):
+    key = (id(vocab), ents, cur, n_new)
+    got = _IDS.get(key)
+    if got is None:
+        toks = allowed_at(cur, n_new, ents)
+        got = torch.tensor([vocab.stoi['<sep>' if a == ';' else a] for a in toks if ('<sep>' if a == ';' else a) in vocab.stoi])
+        if len(_IDS) >= 200_000:
+            _IDS.clear()
+        _IDS[key] = got
+    return got
+
+
+def _grow(cur: tuple, n_new: int, t: str):
+    """Grammar state after writing t."""
+    if t == ';':
+        return (), n_new
+    return cur + (t,), max(n_new, int(t[1:])) if t[0] == '#' else n_new
+
+
 @torch.no_grad()
 def generate(model, vocab: Vocab, inputs: list[list[str]], device, k: int = 1, sample: bool = False,
              temperature: float = 1.0, max_new: int = 96, bs: int = 32, check=None,
@@ -241,7 +274,9 @@ def generate(model, vocab: Vocab, inputs: list[list[str]], device, k: int = 1, s
     Beam search (k best, by mean log-probability per token) or k samples (for reinforcement learning).
     check(facts) -> bool: beam readings it rejects (no family fits) do not count toward the k, so the search goes on
     to consistent ones (execution-guided decoding, Wang et al. 2018); they are used only if nothing passes.
-    Returns, per question, [(facts, score)] best first (samples in drawing order)."""
+    Returns, per question, [(facts, score)] best first (samples in drawing order).
+    Each step scores every reading at once on the device (grammar mask, renormalised log-probs, top-k per reading,
+    then per question); only the kept candidates come back to Python."""
     model.eval()
     sep, eos = vocab.stoi['<sep>'], vocab.stoi['<eos>']
     out = []
@@ -252,38 +287,52 @@ def generate(model, vocab: Vocab, inputs: list[list[str]], device, k: int = 1, s
             out += [[('', float('-inf'))] for _ in chunk]   # a sentence read with no room to write: none, never a cut question
             continue
         cache, logits, plen, P, ents = _prefix(model, vocab, chunk, device, budget)
+        ents = [tuple(e) for e in ents]
         width = k
         rows = torch.arange(len(chunk), device=device)
         if sample:   # k independent samples per question
             rows = rows.repeat_interleave(k)
-        hyps = [(int(r), [], 0.0, 0) for r in rows.tolist()]   # (question, written, log-prob, tokens)
+        hyps = [(int(r), [], 0.0, 0, (), 0) for r in rows.tolist()]   # (question, written, log-prob, tokens, statement, #max)
         cache = [[t[rows] for t in kv] for kv in cache]
         logits, plen_h = logits[rows], plen[rows]
         done = [[] for _ in chunk]
         spare = [[] for _ in chunk]   # finished readings `check` rejected
         for step in range(budget):
-            lp = torch.log_softmax(logits / (temperature if sample else 1.0), -1).cpu()
-            cand = []   # (question, parent row, token, new log-prob)
-            for h, (qi, written, score, n) in enumerate(hyps):
-                allowed = _allowed_ids(vocab, written, ents[qi], budget - step, reserve)
-                a = torch.tensor(allowed)
-                la = lp[h, a] - torch.logsumexp(lp[h, a], 0)   # renormalised over what the grammar allows
-                if sample:
-                    t = int(a[torch.multinomial(la.exp(), 1)])
-                    cand.append((qi, h, t, score + float(la[allowed.index(t)])))
-                else:
-                    top = la.topk(min(width, len(allowed)))
-                    cand += [(qi, h, int(a[i]), score + float(v)) for v, i in zip(top.values, top.indices)]
-            keep = []
+            left = budget - step
+            ids = [_allowed_ids(vocab, hy[1], list(ents[hy[0]]), left, reserve) if reserve and left <= reserve
+                   else _state_ids(vocab, ents[hy[0]], hy[4], hy[5]) for hy in hyps]
+            ids = [torch.as_tensor(x, dtype=torch.long) for x in ids]
+            lens = torch.tensor([len(x) for x in ids])
+            mask = torch.zeros(logits.shape, dtype=torch.bool, device=device)
+            mask[torch.repeat_interleave(torch.arange(len(hyps)), lens).to(device), torch.cat(ids).to(device)] = True
+            lp = torch.log_softmax(logits.float() / (temperature if sample else 1.0), -1).masked_fill(~mask, float('-inf'))
+            lp = lp - torch.logsumexp(lp, -1, keepdim=True)   # renormalised over what the grammar allows
+            base = torch.tensor([hy[2] for hy in hyps], device=device)
             if sample:
-                keep = cand
-            else:
-                by_q = {}
-                for c in cand:
-                    by_q.setdefault(c[0], []).append(c)
-                for qi, cs in by_q.items():
-                    cs.sort(key=lambda c: -c[3])
-                    keep += cs[:width]
+                t = torch.multinomial(lp.exp(), 1)[:, 0]
+                keep = list(zip([hy[0] for hy in hyps], range(len(hyps)), t.tolist(), (base + lp.gather(1, t[:, None])[:, 0]).tolist()))
+            else:   # top `width` per reading, then per question over its readings' candidates
+                w = min(width, lp.size(1))
+                tv, ti = (lp + base[:, None]).topk(w, -1)
+                qs = [hy[0] for hy in hyps]
+                order = list(dict.fromkeys(qs))
+                qpos, seen, sh = {qi: n for n, qi in enumerate(order)}, Counter(), []
+                for qi in qs:   # each reading's slot among its question's readings
+                    sh.append(seen[qi])
+                    seen[qi] += 1
+                m = max(sh) + 1
+                dv = torch.full((len(order), m, w), float('-inf'), device=device)
+                di = torch.zeros((len(order), m, w), dtype=torch.long, device=device)
+                at = (torch.tensor([qpos[qi] for qi in qs], device=device), torch.tensor(sh, device=device))
+                dv[at], di[at] = tv, ti
+                hmap = [[0] * m for _ in order]
+                for h, (qi, s_) in enumerate(zip(qs, sh)):
+                    hmap[qpos[qi]][s_] = h
+                vals, flat = dv.view(len(order), -1).topk(min(width, m * w), -1)
+                tok = di.view(len(order), -1).gather(1, flat)
+                keep = [(order[q], hmap[q][f // w], t, v)
+                        for q, (fr, tr, vr) in enumerate(zip(flat.tolist(), tok.tolist(), vals.tolist()))
+                        for f, t, v in zip(fr, tr, vr) if v != float('-inf')]
             nxt_hyps, parents, toks = [], [], []
             for qi, h, t, sc in keep:
                 written, n = hyps[h][1], hyps[h][3] + 1
@@ -291,7 +340,8 @@ def generate(model, vocab: Vocab, inputs: list[list[str]], device, k: int = 1, s
                     txt = _text(written)
                     (done if sample or check is None or check(txt) else spare)[qi].append((txt, sc / n))
                     continue
-                nxt_hyps.append((qi, written + [';' if t == sep else vocab.itos[t]], sc, n))
+                word = ';' if t == sep else vocab.itos[t]
+                nxt_hyps.append((qi, written + [word], sc, n, *_grow(hyps[h][4], hyps[h][5], word)))
                 parents.append(h)
                 toks.append(t)
             if not sample:   # a question stops once it has k finished readings

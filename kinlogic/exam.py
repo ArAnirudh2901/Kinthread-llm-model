@@ -231,6 +231,9 @@ def _verifier():
     return _VERIFIER[0]
 
 
+_SOLVED = {}   # (question, reading) -> engine result: batched rounds (eval/batched.py) re-run questions
+
+
 def candidates(text: str, read, priors: dict | None = None):
     """(prepared question, [(engine result, reader score)]) for every reading."""
     from .codes import with_codes
@@ -238,16 +241,22 @@ def candidates(text: str, read, priors: dict | None = None):
     read = with_codes(read, p)   # coded questions are read exactly; the model reads the rest
     got = read([p['tokens']])[0]
     readings = [(got, 0.0)] if isinstance(got, str) else [(g, 0.0) if isinstance(g, str) else (g[0], g[1]) for g in got]
-    results, solved = [], {}   # the same reading from several readers (whole, sentence search, simplified) is solved once
+    results = []   # the same reading from several readers (whole, sentence search, simplified) is solved once
+    solved = _SOLVED if priors is None else {}
+    flags = (NAMES_DECIDE, NEAREST, INVERSE, RELAX, DESC_UNNAMED, SMALLEST, CLOSURE)   # what solving one reading reads
     for k, (lf, score) in enumerate(readings):
+        lf = (text, lf, flags)
         if lf not in solved:
+            f = lf[1]
             try:
-                res = _answer_one(p, lf, read, priors)
+                res = _answer_one(p, f, read, priors)
                 if CLOSURE:
-                    res = _closure(p, lf, read, priors, res)
+                    res = _closure(p, f, read, priors, res)
             except Exception as e:   # one bad reading drops out of the vote, not the whole question
-                res = {'answer': 'error', 'option': None, 'status': 'error', 'explanation': f'{type(e).__name__}: {e}', 'facts': lf}
-            res['trace'] = traceability(p, lf)
+                res = {'answer': 'error', 'option': None, 'status': 'error', 'explanation': f'{type(e).__name__}: {e}', 'facts': f}
+            res['trace'] = traceability(p, f)
+            if len(solved) >= 100_000:
+                solved.clear()
             solved[lf] = res
         res = dict(solved[lf])   # top-level keys only are set per reading
         res['reading'] = k

@@ -550,7 +550,9 @@ def main():
                 was = judge.training
                 judge.eval()
                 with torch.no_grad():
-                    sr, _ = run_real(lambda b: _gen(judge, vocab, b, device, k=4), real_dev)
+                    from eval.batched import Rounds
+                    R = Rounds(lambda b, **kw: _gen(judge, vocab, b, device, **kw), rows=256 if device.type == 'cuda' else 64)   # new per checkpoint
+                    sr, _ = run_real(lambda b: R(b, k=4), real_dev, rounds=R)
                 judge.train(was)
                 acc = sum(sr['ok']) / max(1, len(sr['ok']))
                 score = acc + 0.01 * score if a.select_real else score + a.w_real * acc

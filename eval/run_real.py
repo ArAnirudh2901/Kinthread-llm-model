@@ -75,7 +75,7 @@ def correct(r, res):
     return bool(mv_w and mv_g and len(mv_w) == len(mv_g) and all(a == c and (g is None or h is None or g == h) for (a, g), (c, h) in zip(mv_w, mv_g)))
 
 
-def run(read, rows, read_more=None, threshold=0.6, fix=False, answer_fn=None, tracer=None, split=split_of):
+def run(read, rows, read_more=None, threshold=0.6, fix=False, answer_fn=None, tracer=None, split=split_of, rounds=None):
     from eval.real_clean import broken, category
     from eval.verify_keys import OUT as KEYS, qhash
     keys = {}
@@ -85,11 +85,12 @@ def run(read, rows, read_more=None, threshold=0.6, fix=False, answer_fn=None, tr
     sp = collections.defaultdict(lambda: [0, 0])
     misses, oks, fairs, ids = [], [], [], []
     solve = lambda text: answer_fn(text) if answer_fn else answer_corrected(text, read, threshold) if fix else answer_adaptive(text, read, read_more, threshold) if read_more else answer(text, read)
+    done = rounds.answer_all(solve, [as_text(r) for r in rows]) if rounds and not tracer else None
     for i, r in enumerate(rows):
         text = as_text(r)
         if tracer:
             tracer.begin(text)
-        res = solve(text)
+        res = done[i] if done else solve(text)
         ok = correct(r, res)
         oks.append(ok)
         fairs.append(not broken(r))
@@ -135,6 +136,8 @@ if __name__ == '__main__':
     ap.add_argument('--check', action='store_true', help='execution-guided beam: readings no family fits do not count toward k')
     ap.add_argument('--loop_noise', type=float, default=0.0, help='looped reader: relative noise at each later loop start (sampled readings)')
     ap.add_argument('--keep_first', action='store_true', help='--adaptive: a re-read with no family or no question keeps the first answer (off: r8p baseline behaviour)')
+    ap.add_argument('--rows', type=int, default=0, help='readings decoded at once across questions (0: 256 on CUDA, 64 elsewhere)')
+    ap.add_argument('--one_by_one', action='store_true', help='decode one question at a time (the old loop; for timing or checks)')
     ap.add_argument('--focus_search', action='store_true', help='split_search with each sentence read in the whole question (reader trained on build_focus.py rows)')
     ap.add_argument('--simplify', action='store_true', help='questions with relative clauses also read with the clauses split into plain sentences (exam.simplify)')
     ap.add_argument('--hybrid', action='store_true', help='model readings also merged with the exact facts of the clauses the rules understand (exam.with_exact_clauses)')
@@ -177,6 +180,10 @@ if __name__ == '__main__':
     from kinlogic.codes import _fits
     chk = (lambda lf: _fits(lf) is not None) if a.check else None
     gen = lambda b, m=model, v=vocab, **kw: generate(m, v, b, dev, max_new=a.max_new, reserve=a.reserve, **kw)
+    rounds = None
+    if not (a.trace or a.halt or a.one_by_one):   # the reader batched across questions (eval/batched.py)
+        from eval.batched import Rounds
+        rounds = gen = Rounds(gen, rows=a.rows or (256 if dev.type == 'cuda' else 64))
     more = (lambda b: [x + y for x, y in zip(gen(b, k=2 * a.k, check=chk), gen(b, k=2 * a.k, sample=True, temperature=1.0))]) if a.adaptive else None
     read = lambda b: gen(b, k=a.k, check=chk)
     if a.ensemble:   # more readers vote through the same engine: each adds its k readings
@@ -194,8 +201,10 @@ if __name__ == '__main__':
     if a.split_search:
         read = with_split_search(read, fits=fits, base=base)
     if a.focus_search:   # adds to split search; the adaptive re-read gets it too, or a split vote never sees it
-        read = with_split_search(read, focus=True, min_sentences=2, fits=fits, base=base)
-        more = with_split_search(more, focus=True, min_sentences=2, fits=fits, base=base) if more else None
+        from reader import FOCUS_K, with_focus
+        fbase = lambda b: gen(b, k=FOCUS_K, check=chk)
+        read = with_focus(read, model, vocab, dev, base=fbase)
+        more = with_focus(more, model, vocab, dev, base=fbase) if more else None
     if a.simplify:
         from kinlogic.exam import with_simplified
         read = with_simplified(read)
@@ -242,7 +251,7 @@ if __name__ == '__main__':
         from eval.trace import Tracer
         tracer = Tracer(a.trace, shadow=a.trace_shadow).install()
     score, misses = run(read, rows, more, a.adaptive or 0.6, fix=a.correct, answer_fn=fn, tracer=tracer,
-                        split=(lambda r: 'locked2') if a.split == 'locked2' else split_of)
+                        split=(lambda r: 'locked2') if a.split == 'locked2' else split_of, rounds=rounds)
     if a.split == 'locked2':
         record(score, a.ckpt, sys.argv[1:], a.rescore_reason)
     if tracer:

@@ -58,12 +58,6 @@ CATEGORIES = {
 }
 
 
-def _focus(read, model, vocab):
-    from kinlogic.exam import with_split_search
-    from reader import focus_fits
-    return with_split_search(read, focus=True, min_sentences=2, fits=focus_fits(model, vocab))
-
-
 def gold_answer(row) -> dict:
     return exam.answer(row['text'], lambda batch: [[(row['lf'], 0.0)] for _ in batch])
 
@@ -151,9 +145,14 @@ def main():
         from train import get_device
         dev = get_device(force_cpu=a.cpu)
         model, vocab = load_model(a.ckpt, dev)
-        read = lambda batch: generate(model, vocab, batch, dev, k=a.k)
-        read = _focus(read, model, vocab) if a.focus_search else read
-        fn = lambda text: exam.answer(text, read)
+        from eval.batched import Rounds
+        R = Rounds(lambda b, **kw: generate(model, vocab, b, dev, **kw), rows=256 if dev.type == 'cuda' else 64)
+        read = lambda batch: R(batch, k=a.k)   # decoded in batches across questions (eval/batched.py)
+        if a.focus_search:
+            from reader import FOCUS_K, with_focus
+            read = with_focus(read, model, vocab, dev, base=lambda b: R(b, k=FOCUS_K))
+        use = rows
+        fn = R.memo(lambda text: exam.answer(text, read), [r['text'] for r in use] + [r['twin'] for r in use if r.get('twin')])
     elif mode == 'gold':
         lf = {r['text']: r['lf'] for r in rows if r['lf']}
         lf.update({r['twin']: r['lf'] for r in rows if r['lf'] and r.get('twin')})
