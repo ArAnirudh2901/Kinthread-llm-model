@@ -1,0 +1,39 @@
+{
+ "step": "F",
+ "arms": {
+  "keep_first": {
+   "split": "dev",
+   "old_fair": "528/714 = 73.9%",
+   "new_fair": "526/714 = 73.7%",
+   "gain_points": -0.28,
+   "wins": 1,
+   "losses": 3,
+   "p": 0.625,
+   "adopt": false,
+   "rule": "gain >= 2.0 points, wins > losses, McNemar p < 0.05"
+  },
+  "max_new0": {
+   "split": "dev",
+   "old_fair": "528/714 = 73.9%",
+   "new_fair": "530/714 = 74.2%",
+   "gain_points": 0.28,
+   "wins": 4,
+   "losses": 2,
+   "p": 0.6875,
+   "adopt": false,
+   "rule": "gain >= 2.0 points, wins > losses, McNemar p < 0.05"
+  },
+  "both": {
+   "split": "dev",
+   "old_fair": "528/714 = 73.9%",
+   "new_fair": "529/714 = 74.1%",
+   "gain_points": 0.14,
+   "wins": 4,
+   "losses": 3,
+   "p": 1.0,
+   "adopt": false,
+   "rule": "gain >= 2.0 points, wins > losses, McNemar p < 0.05"
+  }
+ },
+ "r8p_sha256": "38c289d351d6517b5cde1bc9fb64ea97bd33eee193639d6351edda52fdfd7a52"
+}
