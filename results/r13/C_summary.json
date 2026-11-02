@@ -1,0 +1,10 @@
+{
+ "step": "C",
+ "r13_sha256": "5da53fb28d79973525d1b96a5f5fd6fd48bf7d03d8c36f3b0242ea2b110c3d3a",
+ "r13_dev_quick_adaptive_hybrid": {
+  "dev": "538/748 = 71.9%",
+  "dev fair": "524/714 = 73.4%",
+  "dev verified": "501/650 = 77.1%"
+ },
+ "r8p_same_setting": "73.0% fair (quick, adaptive + hybrid)"
+}
