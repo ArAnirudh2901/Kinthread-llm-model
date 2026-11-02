@@ -1,0 +1,10 @@
+{
+ "step": "C",
+ "r12_sha256": "c7d002a7ef20e171c634c9c65730fef680d1a4f9c924d331ba3d5f38d45ac87f",
+ "r12_dev_quick_adaptive_hybrid": {
+  "dev": "526/748 = 70.3%",
+  "dev fair": "513/714 = 71.8%",
+  "dev verified": "492/650 = 75.7%"
+ },
+ "r9p_same_setting": "520/714 = 72.8% fair (results/r9p/C; the matched control without the encoder)"
+}
