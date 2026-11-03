@@ -1,0 +1,15 @@
+{
+ "step": "E (locked test, once; owner: \"approve locked\")",
+ "where": "Colab T4 (anirudh.aravalli2905), FINAL flags, r15 verifier",
+ "r15_sha256": "9ec3886a9c15b14f7598d27ee2821197cf423d494645ab76863dc2e5444102f3",
+ "r15": {
+  "test": "490/721 = 68.0%",
+  "test fair": "477/689 = 69.2%",
+  "test verified": "469/640 = 73.3%"
+ },
+ "r8p": {
+  "test fair": "68.8%",
+  "test verified": "72.2%"
+ },
+ "note": "an earlier attempt on aravallianirudh2005 was cut off by the daily Colab limit before any result; a local Mac attempt was stopped before its first chunk finished: this is the only score"
+}
