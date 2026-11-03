@@ -1,0 +1,10 @@
+{
+ "step": "T",
+ "r12t_sha256": "47f1571862aaddda7243e44db3a46acd5b8cc343405897c36733de5002dbfb03",
+ "from": "c7d002a7ef20e171c634c9c65730fef680d1a4f9c924d331ba3d5f38d45ac87f",
+ "r12t_dev_quick_adaptive_hybrid": {
+  "dev": "532/748 = 71.1%",
+  "dev fair": "520/714 = 72.8%",
+  "dev verified": "497/650 = 76.5%"
+ }
+}
