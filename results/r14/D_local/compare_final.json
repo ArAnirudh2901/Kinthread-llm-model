@@ -1,0 +1,10 @@
+{
+ "step": "D (local, Mac)",
+ "r8p_fair": "528/714 = 73.9%",
+ "r14_fair": "525/714 = 73.5%",
+ "wins": 14,
+ "losses": 17,
+ "p": 0.72,
+ "adopt": false,
+ "note": "FINAL flags with r8p verifier; questions 400-748 scored in fresh processes"
+}
