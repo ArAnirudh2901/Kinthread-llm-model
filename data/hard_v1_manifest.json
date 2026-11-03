@@ -13,5 +13,7 @@
   "count": 3484,
   "gender-if": 1498
  },
- "seed": 15
+ "seed": 15,
+ "sha256": "58650d00ed52961dbc2a33f335147e64e934d701daf7e080fc313ae309bb47f1",
+ "note": "built before the implied-fact check (2026-11-03 review): a few count/negation sentences constrain an open gender instead of being implied; every row still states its facts in its text and keeps the original answers"
 }
