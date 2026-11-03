@@ -1,0 +1,6 @@
+{"step": 1000, "train_loss": 0.027362043380737305, "heldout_loss": 0.004247107557603158, "synth": 0.965, "real": 0.7043478260869566, "flags": []}
+{"step": 2000, "train_loss": 0.01796536064147949, "heldout_loss": 0.002487532881787047, "synth": 0.966, "real": 0.7095652173913043, "flags": []}
+{"step": 3000, "train_loss": 0.015718506813049316, "heldout_loss": 0.0026947997394017875, "synth": 0.967, "real": 0.7078260869565217, "flags": ["generalization gap 26% (synthetic 96.7% vs real 70.8%)"]}
+{"step": 4000, "train_loss": 0.015132752418518067, "heldout_loss": 0.003010737767908722, "synth": 0.967, "real": 0.7078260869565217, "flags": ["overfitting: held-out loss rising while training loss falls", "generalization gap 26% (synthetic 96.7% vs real 70.8%)"]}
+{"step": 5000, "train_loss": 0.01364987850189209, "heldout_loss": 0.002682107558939606, "synth": 0.968, "real": 0.7165217391304348, "flags": ["generalization gap 25% (synthetic 96.8% vs real 71.7%)"]}
+{"step": 6000, "train_loss": 0.013278207778930663, "heldout_loss": 0.0026598680415190756, "synth": 0.968, "real": 0.7165217391304348, "flags": ["generalization gap 25% (synthetic 96.8% vs real 71.7%)"]}

@@ -1,0 +1,28 @@
+{
+ "step": "D (local Mac, FINAL flags, r15 verifier; dev scored in fresh 100-question chunks)",
+ "dev_fair": {
+  "r8p": "528/714 = 73.9%",
+  "r13": "531/714 = 74.4%",
+  "r15": "532/714 = 74.5%"
+ },
+ "dev_verified": {
+  "r8p": "503/650 = 77.4%",
+  "r15": "508/650 = 78.2%"
+ },
+ "r15_vs_r8p": {
+  "wins": 16,
+  "losses": 12,
+  "p": 0.572
+ },
+ "consistency_all_agree": {
+  "r8p": 0.94,
+  "r13": 0.98,
+  "r15": 0.99
+ },
+ "gauntlet": {
+  "r8p": 0.9495,
+  "r13": 0.9443,
+  "r15": 0.9503
+ },
+ "training": "Colab T4, r13 + hard_v1 (30k) + teach_sg3 (x4), twins, 6,000 steps; real-dev check 0.7165 at steps 5,000-6,000"
+}
