@@ -1,0 +1,17 @@
+{
+ "rows": 30000,
+ "by_kind": {
+  "puzzle": 13500,
+  "statements": 9000,
+  "nested": 4500,
+  "story": 3000
+ },
+ "constructs": {
+  "negation": 38416,
+  "coordination": 14963,
+  "gender": 13737,
+  "count": 3484,
+  "gender-if": 1498
+ },
+ "seed": 15
+}
